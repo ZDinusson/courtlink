@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import './AuthPage.css'
 
@@ -7,6 +7,8 @@ type Mode = 'login' | 'signup'
 
 export default function AuthPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const next = new URLSearchParams(location.search).get('next') || '/'
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -48,7 +50,7 @@ export default function AuthPage() {
         setLoading(false)
         return
       }
-      navigate('/')
+      navigate(next)
     }
 
     setLoading(false)

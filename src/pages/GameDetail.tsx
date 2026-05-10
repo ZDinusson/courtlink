@@ -34,6 +34,7 @@ export default function GameDetail() {
   const [comments, setComments] = useState<Comment[]>([])
   const [commentBody, setCommentBody] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
   const chatBottomRef = useRef<HTMLDivElement>(null)
 
   const isCreator = user?.id === game?.created_by
@@ -114,6 +115,23 @@ export default function GameDetail() {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       if (commentBody.trim()) handlePostComment(e as unknown as React.FormEvent)
+    }
+  }
+
+  async function handleShare() {
+    if (!game) return
+    const url = window.location.href
+    const shareData = {
+      title: game.title,
+      text: `Join me for ${SPORT_LABEL[game.sport]} at ${game.location}! Spot up on CourtLink.`,
+      url,
+    }
+    if (navigator.share) {
+      try { await navigator.share(shareData) } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
 
@@ -304,9 +322,25 @@ export default function GameDetail() {
               <h1 className="detail-title">{game.title}</h1>
               <p className="detail-host">Hosted by <strong>{game.profiles?.username ?? 'Unknown'}</strong></p>
             </div>
-            {isCreator && game.status !== 'cancelled' && (
-              <button className="btn btn-ghost btn-sm" onClick={openEdit}>Edit</button>
-            )}
+            <div className="detail-top-actions">
+              <button className="btn btn-ghost btn-sm detail-share-btn" onClick={handleShare}>
+                {copied ? (
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--orange)' }}>Copied!</span>
+                ) : (
+                  <>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                    </svg>
+                    Share
+                  </>
+                )}
+              </button>
+              {isCreator && game.status !== 'cancelled' && (
+                <button className="btn btn-ghost btn-sm" onClick={openEdit}>Edit</button>
+              )}
+            </div>
           </div>
 
           <div className="divider" />
@@ -432,7 +466,7 @@ export default function GameDetail() {
           {game.status !== 'cancelled' && (
             <div className="detail-actions">
               {!user ? (
-                <Link to="/auth" className="btn btn-primary btn-lg">
+                <Link to={`/auth?next=/games/${game.id}`} className="btn btn-primary btn-lg">
                   Sign in to Join
                 </Link>
               ) : isCreator ? (
