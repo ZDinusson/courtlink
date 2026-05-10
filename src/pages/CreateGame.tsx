@@ -34,6 +34,7 @@ export default function CreateGame() {
   const [selectedCourt, setSelectedCourt] = useState<CourtResult | null>(null)
   const [courtError, setCourtError] = useState(false)
 
+  const [recurrence, setRecurrence] = useState<'none' | 'weekly' | 'biweekly'>('none')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
 
@@ -115,23 +116,27 @@ export default function CreateGame() {
     setLoading(true)
 
     const dateTime = new Date(`${date}T${time}`).toISOString()
+    const seriesId = recurrence !== 'none' ? crypto.randomUUID() : null
+
+    const gamePayload = {
+      created_by: user.id,
+      title: title.trim(),
+      sport,
+      skill_level: skillLevel,
+      location: selectedCourt.name,
+      player_limit: playerLimit,
+      description: description.trim() || null,
+      status: 'open',
+      court_id: selectedCourt.id,
+      lat: selectedCourt.lat,
+      lng: selectedCourt.lng,
+      recurrence,
+      series_id: seriesId,
+    }
 
     const { data, error: insertError } = await supabase
       .from('games')
-      .insert({
-        created_by: user.id,
-        title: title.trim(),
-        sport,
-        skill_level: skillLevel,
-        location: selectedCourt.name,
-        date_time: dateTime,
-        player_limit: playerLimit,
-        description: description.trim() || null,
-        status: 'open',
-        court_id: selectedCourt.id,
-        lat: selectedCourt.lat,
-        lng: selectedCourt.lng,
-      })
+      .insert({ ...gamePayload, date_time: dateTime })
       .select()
       .single()
 
@@ -155,6 +160,22 @@ export default function CreateGame() {
     }
 
     await supabase.from('game_players').insert({ game_id: data.id, user_id: user.id })
+
+    if (recurrence !== 'none' && seriesId) {
+      const intervalDays = recurrence === 'weekly' ? 7 : 14
+      const additionalGames = Array.from({ length: 3 }, (_, i) => {
+        const next = new Date(dateTime)
+        next.setDate(next.getDate() + intervalDays * (i + 1))
+        return { ...gamePayload, date_time: next.toISOString() }
+      })
+      const { data: seriesData } = await supabase.from('games').insert(additionalGames).select('id')
+      if (seriesData) {
+        await supabase.from('game_players').insert(
+          seriesData.map(g => ({ game_id: g.id, user_id: user.id }))
+        )
+      }
+    }
+
     navigate(`/games/${data.id}`)
   }
 
@@ -275,6 +296,15 @@ export default function CreateGame() {
               <label htmlFor="time">Time</label>
               <input id="time" type="time" value={time} onChange={e => setTime(e.target.value)} required />
             </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="recurrence">Repeat</label>
+            <select id="recurrence" value={recurrence} onChange={e => setRecurrence(e.target.value as typeof recurrence)} className="sport-select">
+              <option value="none">Does not repeat</option>
+              <option value="weekly">Every week (4 games)</option>
+              <option value="biweekly">Every 2 weeks (4 games)</option>
+            </select>
           </div>
 
           <div className="field">

@@ -45,8 +45,11 @@ export default function GameCard({ game }: Props) {
               )}
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <span className="game-card-sport">{SPORT_EMOJI[game.sport]}</span>
+            {game.recurrence && game.recurrence !== 'none' && (
+              <span className="badge badge-recurring">🔁 {game.recurrence === 'weekly' ? 'Weekly' : 'Biweekly'}</span>
+            )}
             {game.skill_level && game.skill_level !== 'all' && (
               <span className="badge badge-skill">{SKILL_LABEL[game.skill_level]}</span>
             )}

@@ -604,6 +604,44 @@
   text-decoration: underline;
 }
 
+.series-section {
+  padding: 4px 0;
+}
+
+.series-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #0D9488;
+  margin-bottom: 10px;
+}
+
+.series-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.series-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(20, 184, 166, 0.06);
+  border: 1px solid rgba(20, 184, 166, 0.15);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  transition: background 0.12s;
+}
+
+.series-item:hover {
+  background: rgba(20, 184, 166, 0.12);
+}
+
 .invite-section {
   margin-top: 16px;
   border-top: 1px solid var(--border);

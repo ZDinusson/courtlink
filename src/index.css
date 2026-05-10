@@ -249,6 +249,11 @@ input, textarea, select {
   color: #6366F1;
 }
 
+.badge-recurring {
+  background: rgba(20, 184, 166, 0.12);
+  color: #0D9488;
+}
+
 .error-msg {
   color: var(--danger);
   font-size: 13px;

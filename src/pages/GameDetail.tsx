@@ -37,6 +37,7 @@ export default function GameDetail() {
   const [copied, setCopied] = useState(false)
   const [waitlist, setWaitlist] = useState<{ id: string; user_id: string; position: number; profiles?: { username: string } }[]>([])
   const [hasRated, setHasRated] = useState<boolean | null>(null)
+  const [seriesGames, setSeriesGames] = useState<{ id: string; date_time: string }[]>([])
   const [friends, setFriends] = useState<{ id: string; username: string }[]>([])
   const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set())
   const [showInvite, setShowInvite] = useState(false)
@@ -96,6 +97,20 @@ export default function GameDetail() {
 
     if (gameData) {
       setGame({ ...gameData, player_count: playersData?.length ?? 0 })
+      if (gameData.series_id) {
+        const { data: series } = await supabase
+          .from('games')
+          .select('id, date_time')
+          .eq('series_id', gameData.series_id)
+          .neq('id', id)
+          .neq('status', 'cancelled')
+          .gte('date_time', new Date().toISOString())
+          .order('date_time', { ascending: true })
+          .limit(5)
+        setSeriesGames(series ?? [])
+      } else {
+        setSeriesGames([])
+      }
       if (user && new Date(gameData.date_time) < new Date()) {
         const { data: existing } = await supabase
           .from('ratings').select('id').eq('game_id', id).eq('rater_id', user.id).limit(1)
@@ -559,6 +574,25 @@ export default function GameDetail() {
             <>
               <div className="divider" />
               <p className="detail-description">{game.description}</p>
+            </>
+          )}
+
+          {seriesGames.length > 0 && (
+            <>
+              <div className="divider" />
+              <div className="series-section">
+                <div className="series-label">🔁 More in this series</div>
+                <div className="series-list">
+                  {seriesGames.map(g => (
+                    <Link key={g.id} to={`/games/${g.id}`} className="series-item">
+                      {formatDateTime(g.date_time)}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ flexShrink: 0 }}>
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </>
           )}
 

@@ -58,6 +58,8 @@ export interface Game {
   player_count?: number
   is_joined?: boolean
   hostRating?: { avg: number; count: number } | null
+  recurrence?: 'none' | 'weekly' | 'biweekly'
+  series_id?: string | null
 }
 
 export interface GamePlayer {
