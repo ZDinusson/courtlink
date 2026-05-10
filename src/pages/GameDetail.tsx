@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import type { Game, GamePlayer } from '../types'
+import { SPORT_EMOJI, SPORT_LABEL, type Game, type GamePlayer } from '../types'
 import './GameDetail.css'
 
 function formatDateTime(dateStr: string) {
@@ -140,6 +140,15 @@ export default function GameDetail() {
           <div className="divider" />
 
           <div className="detail-meta">
+            <div className="detail-meta-item">
+              <div className="detail-meta-icon" style={{ fontSize: 18 }}>
+                {SPORT_EMOJI[game.sport]}
+              </div>
+              <div>
+                <div className="detail-meta-label">Sport</div>
+                <div className="detail-meta-value">{SPORT_LABEL[game.sport]}</div>
+              </div>
+            </div>
             <div className="detail-meta-item">
               <div className="detail-meta-icon">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

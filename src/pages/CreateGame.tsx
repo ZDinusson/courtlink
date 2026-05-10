@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { SPORTS, SPORT_EMOJI, SPORT_LABEL, type Sport } from '../types'
 import './CreateGame.css'
 
 export default function CreateGame() {
@@ -9,6 +10,7 @@ export default function CreateGame() {
   const navigate = useNavigate()
 
   const [title, setTitle] = useState('')
+  const [sport, setSport] = useState<Sport>('basketball')
   const [location, setLocation] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
@@ -32,6 +34,7 @@ export default function CreateGame() {
       .insert({
         created_by: user.id,
         title: title.trim(),
+        sport,
         location: location.trim(),
         date_time: dateTime,
         player_limit: playerLimit,
@@ -81,6 +84,22 @@ export default function CreateGame() {
               required
               maxLength={80}
             />
+          </div>
+
+          <div className="field">
+            <label htmlFor="sport">Sport</label>
+            <select
+              id="sport"
+              value={sport}
+              onChange={e => setSport(e.target.value as Sport)}
+              className="sport-select"
+            >
+              {SPORTS.map(s => (
+                <option key={s} value={s}>
+                  {SPORT_EMOJI[s]} {SPORT_LABEL[s]}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="field">

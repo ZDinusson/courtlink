@@ -26,6 +26,11 @@
 .home-filters {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.home-sport-filters {
   margin-bottom: 20px;
 }
 

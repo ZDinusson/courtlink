@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SPORT_EMOJI } from '../types'
 import type { Game } from '../types'
 import './GameCard.css'
 
@@ -32,7 +33,10 @@ export default function GameCard({ game }: Props) {
           <h3 className="game-card-title">{game.title}</h3>
           <p className="game-card-sub">{game.profiles?.username ?? 'Unknown'}</p>
         </div>
-        <span className={`badge badge-${game.status}`}>{game.status}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span className="game-card-sport">{SPORT_EMOJI[game.sport]}</span>
+          <span className={`badge badge-${game.status}`}>{game.status}</span>
+        </div>
       </div>
 
       <div className="game-card-meta">

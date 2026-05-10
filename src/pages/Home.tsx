@@ -3,20 +3,22 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import GameCard from '../components/GameCard'
-import type { Game } from '../types'
+import { SPORTS, SPORT_EMOJI, SPORT_LABEL, type Sport, type Game } from '../types'
 import './Home.css'
 
 type Filter = 'open' | 'all'
+type SportFilter = Sport | 'all'
 
 export default function Home() {
   const { user } = useAuth()
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<Filter>('open')
+  const [sportFilter, setSportFilter] = useState<SportFilter>('all')
 
   useEffect(() => {
     fetchGames()
-  }, [filter])
+  }, [filter, sportFilter])
 
   async function fetchGames() {
     setLoading(true)
@@ -34,6 +36,10 @@ export default function Home() {
       query = query.eq('status', 'open')
     } else {
       query = query.neq('status', 'cancelled')
+    }
+
+    if (sportFilter !== 'all') {
+      query = query.eq('sport', sportFilter)
     }
 
     const { data, error } = await query
@@ -91,13 +97,33 @@ export default function Home() {
           </button>
         </div>
 
+        <div className="home-filters home-sport-filters">
+          <button
+            className={`filter-btn ${sportFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setSportFilter('all')}
+          >
+            All Sports
+          </button>
+          {SPORTS.map(s => (
+            <button
+              key={s}
+              className={`filter-btn ${sportFilter === s ? 'active' : ''}`}
+              onClick={() => setSportFilter(s)}
+            >
+              {SPORT_EMOJI[s]} {SPORT_LABEL[s]}
+            </button>
+          ))}
+        </div>
+
         {loading ? (
           <div className="home-loading">
             <span className="spinner" style={{ borderTopColor: 'var(--orange)', width: 28, height: 28 }} />
           </div>
         ) : games.length === 0 ? (
           <div className="home-empty">
-            <div className="home-empty-icon">🏀</div>
+            <div className="home-empty-icon">
+              {sportFilter !== 'all' ? SPORT_EMOJI[sportFilter] : '🏀'}
+            </div>
             <p className="home-empty-text">No games scheduled yet.</p>
             {user ? (
               <Link to="/games/new" className="btn btn-primary">

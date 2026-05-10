@@ -83,3 +83,8 @@
 .spots-left {
   color: var(--success);
 }
+
+.game-card-sport {
+  font-size: 18px;
+  line-height: 1;
+}

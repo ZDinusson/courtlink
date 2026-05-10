@@ -14,6 +14,7 @@ create table public.games (
   date_time timestamptz not null,
   player_limit integer not null default 10,
   description text,
+  sport text not null default 'basketball' check (sport in ('basketball', 'badminton', 'pickleball', 'tennis')),
   status text not null default 'open' check (status in ('open', 'full', 'cancelled')),
   created_at timestamptz default now() not null
 );

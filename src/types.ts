@@ -1,3 +1,20 @@
+export const SPORTS = ['basketball', 'badminton', 'pickleball', 'tennis'] as const
+export type Sport = typeof SPORTS[number]
+
+export const SPORT_EMOJI: Record<Sport, string> = {
+  basketball: '🏀',
+  badminton: '🏸',
+  pickleball: '🏓',
+  tennis: '🎾',
+}
+
+export const SPORT_LABEL: Record<Sport, string> = {
+  basketball: 'Basketball',
+  badminton: 'Badminton',
+  pickleball: 'Pickleball',
+  tennis: 'Tennis',
+}
+
 export interface Profile {
   id: string
   username: string
@@ -12,6 +29,7 @@ export interface Game {
   date_time: string
   player_limit: number
   description: string | null
+  sport: Sport
   status: 'open' | 'full' | 'cancelled'
   created_at: string
   profiles?: Profile
