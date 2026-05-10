@@ -13,10 +13,8 @@ import './Courts.css'
 function MapResizer() {
   const map = useMap()
   useEffect(() => {
-    map.invalidateSize()
-    const t1 = setTimeout(() => map.invalidateSize(), 200)
-    const t2 = setTimeout(() => map.invalidateSize(), 600)
-    return () => { clearTimeout(t1); clearTimeout(t2) }
+    const t = setTimeout(() => map.invalidateSize(), 300)
+    return () => clearTimeout(t)
   }, [map])
   return null
 }
