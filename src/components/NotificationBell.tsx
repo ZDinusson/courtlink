@@ -25,6 +25,13 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
+function notifAvatar(n: Notif): React.ReactNode {
+  if (n.type === 'waitlist_promoted') return '🎉'
+  if (n.type === 'game_reminder') return '⏰'
+  if (n.type === 'game_cancelled') return '❌'
+  return (n.sender?.username ?? '?')[0].toUpperCase()
+}
+
 function notifText(n: Notif): React.ReactNode {
   const name = <strong>{n.sender?.username ?? 'Someone'}</strong>
   if (n.type === 'friend_request') return <>{name} sent you a friend request</>
@@ -37,8 +44,14 @@ function notifText(n: Notif): React.ReactNode {
   )
   if (n.type === 'waitlist_promoted') return (
     <>
-      🎉 You&apos;re in!
+      You&apos;re in!
       {n.games?.title ? <> Off the waitlist for <span className="notif-game">{n.games.title}</span></> : ''}
+    </>
+  )
+  if (n.type === 'game_reminder') return (
+    <>
+      Starting in 2 hours
+      {n.games?.title ? <> · <span className="notif-game">{n.games.title}</span></> : ''}
     </>
   )
   return (
@@ -147,7 +160,7 @@ export default function NotificationBell() {
                   onClick={() => handleNotifClick(n)}
                 >
                   <div className="notif-avatar">
-                    {(n.sender?.username ?? '?')[0].toUpperCase()}
+                    {notifAvatar(n)}
                   </div>
                   <div className="notif-content">
                     <div className="notif-text">{notifText(n)}</div>
