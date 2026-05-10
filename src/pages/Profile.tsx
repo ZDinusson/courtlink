@@ -33,6 +33,10 @@ export default function Profile() {
   const [friendsOpen, setFriendsOpen] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([])
   const [respondingTo, setRespondingTo] = useState<string | null>(null)
+  const [editingUsername, setEditingUsername] = useState(false)
+  const [usernameInput, setUsernameInput] = useState('')
+  const [usernameError, setUsernameError] = useState('')
+  const [usernameSaving, setUsernameSaving] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -192,6 +196,22 @@ export default function Profile() {
     setRespondingTo(null)
   }
 
+  async function saveUsername() {
+    if (!user) return
+    const clean = usernameInput.trim()
+    if (!clean || clean.length < 2) { setUsernameError('Username must be at least 2 characters.'); return }
+    setUsernameSaving(true)
+    setUsernameError('')
+    const { error } = await supabase.from('profiles').update({ username: clean }).eq('id', user.id)
+    if (error) {
+      setUsernameError(error.message.includes('unique') ? 'That username is already taken.' : error.message)
+    } else {
+      setUsername(clean)
+      setEditingUsername(false)
+    }
+    setUsernameSaving(false)
+  }
+
   async function handleSignOut() {
     await signOut()
     navigate('/')
@@ -205,7 +225,37 @@ export default function Profile() {
             {username ? username[0].toUpperCase() : '?'}
           </div>
           <div className="profile-info">
-            <h1 className="profile-username">{username || user?.email}</h1>
+            {editingUsername ? (
+              <div className="username-edit-row">
+                <input
+                  className="username-edit-input"
+                  value={usernameInput}
+                  onChange={e => setUsernameInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') saveUsername(); if (e.key === 'Escape') setEditingUsername(false) }}
+                  maxLength={30}
+                  autoFocus
+                />
+                <button className="btn btn-primary btn-sm" onClick={saveUsername} disabled={usernameSaving}>
+                  {usernameSaving ? <span className="spinner" style={{ width: 12, height: 12 }} /> : 'Save'}
+                </button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setEditingUsername(false)}>Cancel</button>
+              </div>
+            ) : (
+              <div className="username-display-row">
+                <h1 className="profile-username">{username || user?.email}</h1>
+                <button
+                  className="username-edit-btn"
+                  onClick={() => { setUsernameInput(username); setUsernameError(''); setEditingUsername(true) }}
+                  title="Edit username"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
+            {usernameError && <p className="username-error">{usernameError}</p>}
             <p className="profile-email">{user?.email}</p>
           </div>
           <button className="btn btn-ghost btn-sm" onClick={handleSignOut}>

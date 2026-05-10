@@ -99,6 +99,7 @@ export default function Players() {
     setResults(prev => prev.map(r =>
       r.id === profileId ? { ...r, friendStatus: 'i_sent', friendship: data } : r
     ))
+    await supabase.from('notifications').insert({ user_id: profileId, type: 'friend_request', from_user_id: user.id })
     setActionLoading(null)
   }
 
@@ -113,12 +114,13 @@ export default function Players() {
   }
 
   async function acceptRequest(profileId: string, friendship: Friendship | null) {
-    if (!friendship) return
+    if (!friendship || !user) return
     setActionLoading(profileId)
     await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendship.id)
     setResults(prev => prev.map(r =>
       r.id === profileId ? { ...r, friendStatus: 'friends', friendship: { ...friendship, status: 'accepted' } } : r
     ))
+    await supabase.from('notifications').insert({ user_id: friendship.requester_id, type: 'friend_accepted', from_user_id: user.id })
     setActionLoading(null)
   }
 

@@ -121,6 +121,7 @@ export default function UserProfile() {
       .single()
     setFriendship(data)
     setFriendStatus('i_sent')
+    await supabase.from('notifications').insert({ user_id: id, type: 'friend_request', from_user_id: user.id })
     setActionLoading(false)
   }
 
@@ -134,12 +135,13 @@ export default function UserProfile() {
   }
 
   async function acceptRequest() {
-    if (!friendship) return
+    if (!friendship || !user) return
     setActionLoading(true)
     await supabase.from('friendships').update({ status: 'accepted' }).eq('id', friendship.id)
     setFriendship({ ...friendship, status: 'accepted' })
     setFriendStatus('friends')
     await fetchFriends()
+    await supabase.from('notifications').insert({ user_id: friendship.requester_id, type: 'friend_accepted', from_user_id: user.id })
     setActionLoading(false)
   }
 

@@ -8,6 +8,7 @@ interface Notif {
   id: string
   type: string
   game_id: string | null
+  from_user_id: string | null
   read: boolean
   created_at: string
   sender: { username: string } | null
@@ -22,6 +23,18 @@ function timeAgo(dateStr: string): string {
   const hrs = Math.floor(mins / 60)
   if (hrs < 24) return `${hrs}h ago`
   return `${Math.floor(hrs / 24)}d ago`
+}
+
+function notifText(n: Notif): React.ReactNode {
+  const name = <strong>{n.sender?.username ?? 'Someone'}</strong>
+  if (n.type === 'friend_request') return <>{name} sent you a friend request</>
+  if (n.type === 'friend_accepted') return <>{name} accepted your friend request</>
+  return (
+    <>
+      {name} joined your game
+      {n.games?.title ? <> · <span className="notif-game">{n.games.title}</span></> : ''}
+    </>
+  )
 }
 
 export default function NotificationBell() {
@@ -65,7 +78,7 @@ export default function NotificationBell() {
       .select('*, sender:profiles!from_user_id (username), games (title)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(15)
+      .limit(20)
     setNotifs((data ?? []) as Notif[])
   }
 
@@ -79,6 +92,15 @@ export default function NotificationBell() {
         .eq('user_id', user!.id)
         .eq('read', false)
       setNotifs(prev => prev.map(n => ({ ...n, read: true })))
+    }
+  }
+
+  function handleNotifClick(n: Notif) {
+    setOpen(false)
+    if (n.type === 'friend_request' || n.type === 'friend_accepted') {
+      if (n.from_user_id) navigate(`/users/${n.from_user_id}`)
+    } else {
+      if (n.game_id) navigate(`/games/${n.game_id}`)
     }
   }
 
@@ -110,16 +132,13 @@ export default function NotificationBell() {
                 <button
                   key={n.id}
                   className={`notif-item ${n.read ? '' : 'unread'}`}
-                  onClick={() => { setOpen(false); if (n.game_id) navigate(`/games/${n.game_id}`) }}
+                  onClick={() => handleNotifClick(n)}
                 >
                   <div className="notif-avatar">
                     {(n.sender?.username ?? '?')[0].toUpperCase()}
                   </div>
                   <div className="notif-content">
-                    <div className="notif-text">
-                      <strong>{n.sender?.username ?? 'Someone'}</strong> joined your game
-                      {n.games?.title ? <> · <span className="notif-game">{n.games.title}</span></> : ''}
-                    </div>
+                    <div className="notif-text">{notifText(n)}</div>
                     <div className="notif-time">{timeAgo(n.created_at)}</div>
                   </div>
                   {!n.read && <div className="notif-dot" />}
