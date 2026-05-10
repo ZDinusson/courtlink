@@ -2,11 +2,37 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import {
-  PLAYER_TAGS, HOST_TAGS, TAG_LABEL, TAG_EMOJI,
-  type RatingTag, type GamePlayer, type Game,
-} from '../types'
+import type { Attendance, GamePlayer, Game } from '../types'
 import './RateGame.css'
+
+interface PlayerRating {
+  attendance: Attendance | null
+  attitudeRating: number | null
+  hostRating: number | null
+}
+
+function StarPicker({ value, onChange }: { value: number | null; onChange: (v: number) => void }) {
+  const [hovered, setHovered] = useState<number | null>(null)
+  const display = hovered ?? value ?? 0
+  return (
+    <div className="star-picker">
+      {[1, 2, 3, 4, 5].map(n => (
+        <button
+          key={n}
+          type="button"
+          className={`star ${n <= display ? 'active' : ''}`}
+          onMouseEnter={() => setHovered(n)}
+          onMouseLeave={() => setHovered(null)}
+          onClick={() => onChange(n)}
+          aria-label={`${n} star`}
+        >
+          ★
+        </button>
+      ))}
+      {value && <span className="star-label">{value}/5</span>}
+    </div>
+  )
+}
 
 export default function RateGame() {
   const { id } = useParams<{ id: string }>()
@@ -18,7 +44,7 @@ export default function RateGame() {
   const [alreadyRated, setAlreadyRated] = useState(false)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [ratings, setRatings] = useState<Record<string, RatingTag[]>>({})
+  const [ratings, setRatings] = useState<Record<string, PlayerRating>>({})
 
   useEffect(() => {
     if (id && user) load()
@@ -40,7 +66,7 @@ export default function RateGame() {
       .eq('game_id', id)
       .order('joined_at', { ascending: true })
 
-    const { data: existingRatings } = await supabase
+    const { data: existing } = await supabase
       .from('ratings')
       .select('id')
       .eq('game_id', id)
@@ -48,31 +74,20 @@ export default function RateGame() {
 
     if (gameData) setGame({ ...gameData, player_count: playersData?.length ?? 0 })
     setPlayers(playersData ?? [])
-    setAlreadyRated((existingRatings ?? []).length > 0)
+    setAlreadyRated((existing ?? []).length > 0)
 
-    const initial: Record<string, RatingTag[]> = {}
+    const initial: Record<string, PlayerRating> = {}
     for (const p of playersData ?? []) {
-      if (p.user_id !== user.id) initial[p.user_id] = []
+      if (p.user_id !== user.id) {
+        initial[p.user_id] = { attendance: null, attitudeRating: null, hostRating: null }
+      }
     }
     setRatings(initial)
-
     setLoading(false)
   }
 
-  function toggleTag(userId: string, tag: RatingTag) {
-    setRatings(prev => {
-      const current = prev[userId] ?? []
-      if (tag === 'showed_up' && !current.includes('showed_up')) {
-        return { ...prev, [userId]: [...current.filter(t => t !== 'no_show'), 'showed_up'] }
-      }
-      if (tag === 'no_show' && !current.includes('no_show')) {
-        return { ...prev, [userId]: [...current.filter(t => t !== 'showed_up'), 'no_show'] }
-      }
-      if (current.includes(tag)) {
-        return { ...prev, [userId]: current.filter(t => t !== tag) }
-      }
-      return { ...prev, [userId]: [...current, tag] }
-    })
+  function update(userId: string, patch: Partial<PlayerRating>) {
+    setRatings(prev => ({ ...prev, [userId]: { ...prev[userId], ...patch } }))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -81,18 +96,17 @@ export default function RateGame() {
     setSubmitting(true)
 
     const rows = Object.entries(ratings)
-      .filter(([, tags]) => tags.length > 0)
-      .map(([rateeId, tags]) => ({
+      .filter(([, r]) => r.attendance || r.attitudeRating || r.hostRating)
+      .map(([rateeId, r]) => ({
         game_id: game.id,
         rater_id: user.id,
         ratee_id: rateeId,
-        tags,
+        attendance: r.attendance ?? null,
+        attitude_rating: r.attitudeRating ?? null,
+        host_rating: r.hostRating ?? null,
       }))
 
-    if (rows.length > 0) {
-      await supabase.from('ratings').insert(rows)
-    }
-
+    if (rows.length > 0) await supabase.from('ratings').insert(rows)
     navigate(`/games/${game.id}`)
   }
 
@@ -129,7 +143,7 @@ export default function RateGame() {
     return (
       <div className="container" style={{ paddingTop: 40, textAlign: 'center' }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-        <p style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>You've already rated this game.</p>
+        <p style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Already rated this game.</p>
         <Link to={`/games/${id}`} className="btn btn-ghost" style={{ marginTop: 8 }}>Back to Game</Link>
       </div>
     )
@@ -155,7 +169,7 @@ export default function RateGame() {
         <form onSubmit={handleSubmit}>
           {others.map(player => {
             const isHost = player.user_id === game.created_by
-            const selected = ratings[player.user_id] ?? []
+            const r = ratings[player.user_id]
             return (
               <div key={player.user_id} className="rate-card card">
                 <div className="rate-player-header">
@@ -170,51 +184,39 @@ export default function RateGame() {
 
                 <div className="rate-group">
                   <div className="rate-group-label">Attendance</div>
-                  <div className="rate-tags">
-                    {(['showed_up', 'no_show'] as const).map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        className={`rate-tag ${selected.includes(tag) ? 'selected' : ''} ${tag === 'no_show' ? 'tag-negative' : 'tag-positive'}`}
-                        onClick={() => toggleTag(player.user_id, tag)}
-                      >
-                        {TAG_EMOJI[tag]} {TAG_LABEL[tag]}
-                      </button>
-                    ))}
+                  <div className="rate-attendance">
+                    <button
+                      type="button"
+                      className={`attendance-btn positive ${r?.attendance === 'showed_up' ? 'selected' : ''}`}
+                      onClick={() => update(player.user_id, { attendance: r?.attendance === 'showed_up' ? null : 'showed_up' })}
+                    >
+                      ✅ Showed Up
+                    </button>
+                    <button
+                      type="button"
+                      className={`attendance-btn negative ${r?.attendance === 'no_show' ? 'selected' : ''}`}
+                      onClick={() => update(player.user_id, { attendance: r?.attendance === 'no_show' ? null : 'no_show' })}
+                    >
+                      ❌ No-Show
+                    </button>
                   </div>
                 </div>
 
                 <div className="rate-group">
-                  <div className="rate-group-label">Player vibes</div>
-                  <div className="rate-tags">
-                    {(['good_teammate', 'too_aggressive', 'friendly_player'] as const).map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        className={`rate-tag ${selected.includes(tag) ? 'selected' : ''} ${tag === 'too_aggressive' ? 'tag-negative' : ''}`}
-                        onClick={() => toggleTag(player.user_id, tag)}
-                      >
-                        {TAG_EMOJI[tag]} {TAG_LABEL[tag]}
-                      </button>
-                    ))}
-                  </div>
+                  <div className="rate-group-label">Attitude</div>
+                  <StarPicker
+                    value={r?.attitudeRating ?? null}
+                    onChange={v => update(player.user_id, { attitudeRating: v })}
+                  />
                 </div>
 
                 {isHost && (
                   <div className="rate-group">
-                    <div className="rate-group-label">Host quality</div>
-                    <div className="rate-tags">
-                      {HOST_TAGS.map(tag => (
-                        <button
-                          key={tag}
-                          type="button"
-                          className={`rate-tag ${selected.includes(tag) ? 'selected' : ''}`}
-                          onClick={() => toggleTag(player.user_id, tag)}
-                        >
-                          {TAG_EMOJI[tag]} {TAG_LABEL[tag]}
-                        </button>
-                      ))}
-                    </div>
+                    <div className="rate-group-label">Host Quality</div>
+                    <StarPicker
+                      value={r?.hostRating ?? null}
+                      onChange={v => update(player.user_id, { hostRating: v })}
+                    />
                   </div>
                 )}
               </div>

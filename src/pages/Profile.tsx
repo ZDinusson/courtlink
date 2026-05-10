@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { TAG_LABEL, TAG_EMOJI, type RatingTag, type Game } from '../types'
+import type { Game } from '../types'
 import GameCard from '../components/GameCard'
 import './Profile.css'
 
@@ -15,7 +15,9 @@ export default function Profile() {
   const [games, setGames] = useState<Game[]>([])
   const [tab, setTab] = useState<Tab>('hosting')
   const [loading, setLoading] = useState(true)
-  const [tagCounts, setTagCounts] = useState<Partial<Record<RatingTag, number>>>({})
+  const [playerRating, setPlayerRating] = useState<{ avg: number; count: number } | null>(null)
+  const [hostRating, setHostRating] = useState<{ avg: number; count: number } | null>(null)
+  const [attendance, setAttendance] = useState<{ showed: number; noShow: number }>({ showed: 0, noShow: 0 })
 
   useEffect(() => {
     if (user) fetchData()
@@ -35,16 +37,21 @@ export default function Profile() {
 
     const { data: ratingsData } = await supabase
       .from('ratings')
-      .select('tags')
+      .select('attitude_rating, host_rating, attendance')
       .eq('ratee_id', user.id)
 
-    const counts: Partial<Record<RatingTag, number>> = {}
-    for (const row of ratingsData ?? []) {
-      for (const tag of (row.tags as RatingTag[])) {
-        counts[tag] = (counts[tag] ?? 0) + 1
-      }
+    const attitudes = (ratingsData ?? []).map(r => r.attitude_rating).filter(Boolean) as number[]
+    const hosts = (ratingsData ?? []).map(r => r.host_rating).filter(Boolean) as number[]
+    const showed = (ratingsData ?? []).filter(r => r.attendance === 'showed_up').length
+    const noShow = (ratingsData ?? []).filter(r => r.attendance === 'no_show').length
+
+    if (attitudes.length > 0) {
+      setPlayerRating({ avg: attitudes.reduce((a, b) => a + b, 0) / attitudes.length, count: attitudes.length })
     }
-    setTagCounts(counts)
+    if (hosts.length > 0) {
+      setHostRating({ avg: hosts.reduce((a, b) => a + b, 0) / hosts.length, count: hosts.length })
+    }
+    setAttendance({ showed, noShow })
 
     if (tab === 'hosting') {
       const { data } = await supabase
@@ -107,20 +114,47 @@ export default function Profile() {
           </button>
         </div>
 
-        {Object.keys(tagCounts).length > 0 && (
+        {(playerRating || hostRating || attendance.showed > 0 || attendance.noShow > 0) && (
           <div className="reputation-card card">
             <div className="reputation-title">Reputation</div>
-            <div className="reputation-tags">
-              {(Object.entries(tagCounts) as [RatingTag, number][])
-                .sort((a, b) => b[1] - a[1])
-                .map(([tag, count]) => (
-                  <div key={tag} className={`reputation-tag ${tag === 'no_show' || tag === 'too_aggressive' ? 'rep-negative' : ''}`}>
-                    <span className="rep-emoji">{TAG_EMOJI[tag]}</span>
-                    <span className="rep-label">{TAG_LABEL[tag]}</span>
-                    <span className="rep-count">×{count}</span>
+            <div className="rep-rows">
+              {playerRating && (
+                <div className="rep-row">
+                  <div className="rep-row-label">Player Rating</div>
+                  <div className="rep-row-right">
+                    <div className="rep-stars">
+                      {[1,2,3,4,5].map(n => (
+                        <span key={n} className={`rep-star ${n <= Math.round(playerRating.avg) ? 'filled' : ''}`}>★</span>
+                      ))}
+                    </div>
+                    <span className="rep-avg">{playerRating.avg.toFixed(1)}</span>
+                    <span className="rep-count">({playerRating.count} {playerRating.count === 1 ? 'rating' : 'ratings'})</span>
                   </div>
-                ))
-              }
+                </div>
+              )}
+              {hostRating && (
+                <div className="rep-row">
+                  <div className="rep-row-label">Host Rating</div>
+                  <div className="rep-row-right">
+                    <div className="rep-stars">
+                      {[1,2,3,4,5].map(n => (
+                        <span key={n} className={`rep-star ${n <= Math.round(hostRating.avg) ? 'filled' : ''}`}>★</span>
+                      ))}
+                    </div>
+                    <span className="rep-avg">{hostRating.avg.toFixed(1)}</span>
+                    <span className="rep-count">({hostRating.count} {hostRating.count === 1 ? 'rating' : 'ratings'})</span>
+                  </div>
+                </div>
+              )}
+              {(attendance.showed > 0 || attendance.noShow > 0) && (
+                <div className="rep-row">
+                  <div className="rep-row-label">Attendance</div>
+                  <div className="rep-row-right">
+                    {attendance.showed > 0 && <span className="att-badge att-showed">✅ Showed Up ×{attendance.showed}</span>}
+                    {attendance.noShow > 0 && <span className="att-badge att-noshow">❌ No-Show ×{attendance.noShow}</span>}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

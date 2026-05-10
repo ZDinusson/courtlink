@@ -52,45 +52,77 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-muted);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
-.reputation-tags {
+.rep-rows {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.reputation-tag {
+.rep-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 100px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  font-size: 13px;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.reputation-tag.rep-negative {
-  background: rgba(239,68,68,0.06);
-  border-color: rgba(239,68,68,0.2);
-}
-
-.rep-emoji {
+.rep-row-label {
   font-size: 14px;
-  line-height: 1;
+  font-weight: 600;
+  color: var(--text);
+  min-width: 100px;
 }
 
-.rep-label {
-  font-weight: 600;
+.rep-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rep-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.rep-star {
+  font-size: 18px;
+  color: var(--border-light);
+}
+
+.rep-star.filled {
+  color: #FBBF24;
+}
+
+.rep-avg {
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text);
 }
 
 .rep-count {
   font-size: 12px;
   color: var(--text-muted);
-  font-weight: 500;
+}
+
+.att-badge {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+}
+
+.att-showed {
+  background: rgba(22,163,74,0.1);
+  color: var(--success);
+}
+
+.att-noshow {
+  background: rgba(220,38,38,0.1);
+  color: var(--danger);
 }
 
 .profile-tabs {
