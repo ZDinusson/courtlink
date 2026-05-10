@@ -76,20 +76,10 @@
     font-size: 18px;
   }
   .navbar-nav {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex-shrink: 1;
-    min-width: 0;
-  }
-  .navbar-nav::-webkit-scrollbar {
     display: none;
   }
-  .navbar-link {
-    font-size: 13px;
-    padding: 6px 10px;
-    white-space: nowrap;
-    flex-shrink: 0;
+  .dm-bell {
+    display: none;
   }
   .btn-ghost.btn-sm {
     display: none;

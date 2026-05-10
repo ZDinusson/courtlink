@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import Navbar from './components/Navbar'
+import BottomNav from './components/BottomNav'
 import Home from './pages/Home'
 import AuthPage from './pages/AuthPage'
 import CreateGame from './pages/CreateGame'
@@ -30,7 +31,7 @@ function AppRoutes() {
   return (
     <>
       <Navbar />
-      <main style={{ flex: 1, paddingBottom: 32 }}>
+      <main className="main-content">
         <Routes>
           <Route path="/" element={user ? <Home /> : <Landing />} />
           <Route path="/auth" element={user ? <Navigate to="/" /> : <AuthPage />} />
@@ -47,6 +48,7 @@ function AppRoutes() {
           <Route path="/players" element={<Players />} />
         </Routes>
       </main>
+      <BottomNav />
     </>
   )
 }
