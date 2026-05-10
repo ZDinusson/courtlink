@@ -38,8 +38,19 @@ export default function CourtDetail() {
   const [tagCounts, setTagCounts] = useState<Partial<Record<CourtTag, number>>>({})
   const [toggling, setToggling] = useState<CourtTag | null>(null)
   const [courtGames, setCourtGames] = useState<Game[]>([])
+  const [reviews, setReviews] = useState<{ id: string; user_id: string; rating: number; review: string | null; created_at: string; profiles?: { username: string } }[]>([])
+  const [myRating, setMyRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [myReviewText, setMyReviewText] = useState('')
+  const [reviewLoading, setReviewLoading] = useState(false)
+  const [reviewError, setReviewError] = useState('')
 
-  useEffect(() => { fetchCourt(); fetchCourtGames() }, [id])
+  const avgRating = reviews.length
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : null
+  const myExistingReview = reviews.find(r => r.user_id === user?.id)
+
+  useEffect(() => { fetchCourt(); fetchCourtGames(); fetchReviews() }, [id])
 
   async function fetchCourt() {
     if (!id) return
@@ -99,6 +110,45 @@ export default function CourtDetail() {
     }
   }
 
+  async function fetchReviews() {
+    if (!id) return
+    const { data } = await supabase
+      .from('court_reviews')
+      .select('id, user_id, rating, review, created_at, profiles (username)')
+      .eq('court_id', id)
+      .order('created_at', { ascending: false })
+    const list = (data ?? []) as unknown as typeof reviews
+    setReviews(list)
+    if (user) {
+      const mine = list.find(r => r.user_id === user.id)
+      if (mine) { setMyRating(mine.rating); setMyReviewText(mine.review ?? '') }
+    }
+  }
+
+  async function submitReview(e: React.FormEvent) {
+    e.preventDefault()
+    if (!user || !id || !myRating) return
+    setReviewLoading(true)
+    setReviewError('')
+    const { error } = await supabase.from('court_reviews').upsert(
+      { court_id: id, user_id: user.id, rating: myRating, review: myReviewText.trim() || null },
+      { onConflict: 'court_id,user_id' }
+    )
+    if (error) setReviewError(error.message)
+    else await fetchReviews()
+    setReviewLoading(false)
+  }
+
+  async function deleteReview() {
+    if (!user || !id) return
+    setReviewLoading(true)
+    await supabase.from('court_reviews').delete().eq('court_id', id).eq('user_id', user.id)
+    setMyRating(0)
+    setMyReviewText('')
+    await fetchReviews()
+    setReviewLoading(false)
+  }
+
   async function toggleTag(tag: CourtTag) {
     if (!user || !id || toggling) return
     setToggling(tag)
@@ -150,6 +200,13 @@ export default function CourtDetail() {
             {COURT_SPORT_EMOJI[court.sport]} {COURT_SPORT_LABEL[court.sport]}
           </div>
           <h1 className="courtdetail-name">{court.name}</h1>
+          {avgRating !== null && (
+            <div className="courtdetail-avg-rating">
+              {'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}
+              <span className="courtdetail-avg-num">{avgRating.toFixed(1)}</span>
+              <span className="courtdetail-avg-count">({reviews.length} {reviews.length === 1 ? 'review' : 'reviews'})</span>
+            </div>
+          )}
           <div className="courtdetail-addr">{court.address}</div>
           {court.profiles && (
             <div className="courtdetail-addedby">Added by @{court.profiles.username}</div>
@@ -164,8 +221,8 @@ export default function CourtDetail() {
             zoomControl={false}
           >
             <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
             <Marker position={[court.lat, court.lng]} icon={courtIcon(court.sport, color)} />
           </MapContainer>
@@ -206,6 +263,80 @@ export default function CourtDetail() {
             <p className="courtdetail-signin-note">
               <Link to="/auth">Sign in</Link> to tag this location.
             </p>
+          )}
+        </div>
+
+        <div className="card courtdetail-reviews-card">
+          <div className="courtdetail-reviews-header">
+            <div className="courtdetail-tags-title">Ratings & Reviews</div>
+            {avgRating !== null && (
+              <div className="courtdetail-reviews-avg">
+                <span className="courtdetail-reviews-avg-num">{avgRating.toFixed(1)}</span>
+                <span className="courtdetail-reviews-stars">
+                  {'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {user ? (
+            <form onSubmit={submitReview} className="courtdetail-review-form">
+              <div className="review-stars-pick">
+                {[1,2,3,4,5].map(n => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`review-star ${n <= (hoverRating || myRating) ? 'filled' : ''}`}
+                    onMouseEnter={() => setHoverRating(n)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    onClick={() => setMyRating(n)}
+                  >★</button>
+                ))}
+                {myRating > 0 && <span className="review-star-label">{['','Poor','Fair','Good','Great','Excellent'][myRating]}</span>}
+              </div>
+              <textarea
+                className="review-textarea"
+                placeholder="Share your experience (optional)"
+                value={myReviewText}
+                onChange={e => setMyReviewText(e.target.value)}
+                maxLength={300}
+                rows={3}
+              />
+              {reviewError && <p className="error-msg">{reviewError}</p>}
+              <div className="review-form-actions">
+                {myExistingReview && (
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={deleteReview} disabled={reviewLoading}>
+                    Delete
+                  </button>
+                )}
+                <button type="submit" className="btn btn-primary btn-sm" disabled={reviewLoading || !myRating}>
+                  {reviewLoading ? <span className="spinner" /> : myExistingReview ? 'Update Review' : 'Post Review'}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <p className="courtdetail-signin-note">
+              <Link to="/auth">Sign in</Link> to leave a review.
+            </p>
+          )}
+
+          {reviews.length > 0 && (
+            <div className="courtdetail-reviews-list">
+              {reviews.map(r => (
+                <div key={r.id} className="review-item">
+                  <div className="review-item-top">
+                    <Link to={`/users/${r.user_id}`} className="review-item-user">@{r.profiles?.username ?? 'user'}</Link>
+                    <span className="review-item-stars">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                    <span className="review-item-date">{new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                  {r.review && <p className="review-item-text">{r.review}</p>}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {reviews.length === 0 && !user && (
+            <p className="courtdetail-tags-hint" style={{ marginTop: 8 }}>No reviews yet. Be the first!</p>
           )}
         </div>
 
