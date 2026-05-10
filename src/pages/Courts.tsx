@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -9,6 +9,12 @@ import {
   type Court, type CourtSport, type Game,
 } from '../types'
 import './Courts.css'
+
+function MapResizer() {
+  const map = useMap()
+  useEffect(() => { setTimeout(() => map.invalidateSize(), 100) }, [map])
+  return null
+}
 
 const ST_LOUIS: [number, number] = [38.6270, -90.1994]
 const NEAR_MILES = 10
@@ -203,9 +209,10 @@ export default function Courts() {
             zoom={12}
             className="courts-map"
           >
+            <MapResizer />
             <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
+              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
             {courts.map(court => (
               <Marker key={court.id} position={[court.lat, court.lng]} icon={courtIcon(court.sport)}>
