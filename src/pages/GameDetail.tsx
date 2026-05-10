@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { SPORT_EMOJI, SPORT_LABEL, SPORTS, type Sport, type Game, type GamePlayer } from '../types'
+import { SPORT_EMOJI, SPORT_LABEL, SPORTS, type Sport, type Game, type GamePlayer, type Comment } from '../types'
 import './GameDetail.css'
 
 function formatDateTime(dateStr: string) {
@@ -30,6 +30,9 @@ export default function GameDetail() {
   const [editTime, setEditTime] = useState('')
   const [editDescription, setEditDescription] = useState('')
   const [editLoading, setEditLoading] = useState(false)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [commentBody, setCommentBody] = useState('')
+  const [commentLoading, setCommentLoading] = useState(false)
 
   const isCreator = user?.id === game?.created_by
   const isJoined = players.some(p => p.user_id === user?.id)
@@ -39,6 +42,8 @@ export default function GameDetail() {
     if (!id) return
     fetchGame(true)
 
+    fetchComments()
+
     const channel = supabase
       .channel(`game-${id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'game_players', filter: `game_id=eq.${id}` }, () => {
@@ -46,6 +51,9 @@ export default function GameDetail() {
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${id}` }, () => {
         fetchGame()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comments', filter: `game_id=eq.${id}` }, () => {
+        fetchComments()
       })
       .subscribe()
 
@@ -73,6 +81,29 @@ export default function GameDetail() {
     }
     setPlayers(playersData ?? [])
     if (showSpinner) setLoading(false)
+  }
+
+  async function fetchComments() {
+    if (!id) return
+    const { data } = await supabase
+      .from('comments')
+      .select('*, profiles (id, username)')
+      .eq('game_id', id)
+      .order('created_at', { ascending: true })
+    setComments(data ?? [])
+  }
+
+  async function handlePostComment(e: React.FormEvent) {
+    e.preventDefault()
+    if (!user || !game || !commentBody.trim()) return
+    setCommentLoading(true)
+    await supabase.from('comments').insert({
+      game_id: game.id,
+      user_id: user.id,
+      body: commentBody.trim(),
+    })
+    setCommentBody('')
+    setCommentLoading(false)
   }
 
   async function handleJoin() {
@@ -364,6 +395,51 @@ export default function GameDetail() {
               This game has been cancelled.
             </div>
           )}
+
+          <div className="divider" />
+
+          <div className="comments-section">
+            <h3 className="comments-title">Comments {comments.length > 0 && <span className="comments-count">{comments.length}</span>}</h3>
+
+            {comments.length === 0 && (
+              <p className="comments-empty">No comments yet. Be the first.</p>
+            )}
+
+            <div className="comments-list">
+              {comments.map(c => (
+                <div key={c.id} className="comment">
+                  <div className="comment-avatar">
+                    {(c.profiles?.username ?? '?')[0].toUpperCase()}
+                  </div>
+                  <div className="comment-body">
+                    <div className="comment-meta">
+                      <span className="comment-username">{c.profiles?.username ?? 'Unknown'}</span>
+                      <span className="comment-time">{new Date(c.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} · {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    </div>
+                    <p className="comment-text">{c.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {user ? (
+              <form onSubmit={handlePostComment} className="comment-form">
+                <textarea
+                  className="comment-input"
+                  placeholder="Add a comment..."
+                  value={commentBody}
+                  onChange={e => setCommentBody(e.target.value)}
+                  maxLength={300}
+                  rows={2}
+                />
+                <button type="submit" className="btn btn-primary btn-sm" disabled={commentLoading || !commentBody.trim()}>
+                  {commentLoading ? <span className="spinner" /> : 'Post'}
+                </button>
+              </form>
+            ) : (
+              <p className="comments-signin"><Link to="/auth">Sign in</Link> to leave a comment.</p>
+            )}
+          </div>
           </>
           )}
         </div>

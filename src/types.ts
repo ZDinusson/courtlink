@@ -44,3 +44,12 @@ export interface GamePlayer {
   joined_at: string
   profiles?: Profile
 }
+
+export interface Comment {
+  id: string
+  game_id: string
+  user_id: string
+  body: string
+  created_at: string
+  profiles?: Profile
+}
