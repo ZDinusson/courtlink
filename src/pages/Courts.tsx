@@ -12,7 +12,12 @@ import './Courts.css'
 
 function MapResizer() {
   const map = useMap()
-  useEffect(() => { setTimeout(() => map.invalidateSize(), 100) }, [map])
+  useEffect(() => {
+    map.invalidateSize()
+    const t1 = setTimeout(() => map.invalidateSize(), 200)
+    const t2 = setTimeout(() => map.invalidateSize(), 600)
+    return () => { clearTimeout(t1); clearTimeout(t2) }
+  }, [map])
   return null
 }
 
