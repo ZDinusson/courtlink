@@ -41,21 +41,28 @@ function getTimeRange(when: WhenFilter): { start: string; end: string } | null {
   return null
 }
 
-function makeGameIcon(sport: Sport) {
-  const emoji = SPORT_EMOJI[sport]
-  return L.divIcon({
-    className: '',
-    html: `<div style="
-      width:38px;height:38px;border-radius:50%;
-      background:#F97316;border:3px solid #fff;
-      box-shadow:0 2px 10px rgba(0,0,0,0.25);
-      display:flex;align-items:center;justify-content:center;
-      font-size:17px;cursor:pointer;
-    ">${emoji}</div>`,
-    iconSize: [38, 38],
-    iconAnchor: [19, 19],
-  })
-}
+const gamePinIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:18px;height:18px;border-radius:50%;
+    background:#EF4444;border:3px solid #fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.28);
+    cursor:pointer;
+  "></div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+})
+
+const userDotIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:16px;height:16px;border-radius:50%;
+    background:#3B82F6;border:3px solid #fff;
+    box-shadow:0 0 0 3px rgba(59,130,246,0.3),0 2px 8px rgba(0,0,0,0.2);
+  "></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+})
 
 function GameMapPins({ games }: { games: Game[] }) {
   const navigate = useNavigate()
@@ -67,7 +74,7 @@ function GameMapPins({ games }: { games: Game[] }) {
         <Marker
           key={g.id}
           position={[g.lat!, g.lng!]}
-          icon={makeGameIcon(g.sport)}
+          icon={gamePinIcon}
           eventHandlers={{ click: () => navigate(`/games/${g.id}`) }}
         />
       ))}
@@ -83,10 +90,20 @@ export default function Home() {
   const [sportFilter, setSportFilter] = useState<SportFilter>('all')
   const [whenFilter, setWhenFilter] = useState<WhenFilter>('any')
   const [skillFilter, setSkillFilter] = useState<SkillLevel | 'any'>('any')
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
 
   useEffect(() => {
     fetchGames()
   }, [statusFilter, sportFilter, whenFilter, skillFilter])
+
+  useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      pos => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {},
+      { timeout: 8000 }
+    )
+  }, [])
 
   async function fetchGames() {
     setLoading(true)
@@ -160,6 +177,9 @@ export default function Home() {
             attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
           />
           <GameMapPins games={games} />
+          {userLocation && (
+            <Marker position={[userLocation.lat, userLocation.lng]} icon={userDotIcon} />
+          )}
         </MapContainer>
 
         <div className="home-map-overlay">

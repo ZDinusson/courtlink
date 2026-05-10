@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import {
   COURT_SPORTS, COURT_SPORT_EMOJI, COURT_SPORT_LABEL, COURT_SPORT_COLOR,
-  type Court, type CourtSport,
+  type Court, type CourtSport, type Game,
 } from '../types'
 import './Courts.css'
 
@@ -42,18 +42,28 @@ function courtIcon(sport: CourtSport) {
   })
 }
 
-function userDotIcon() {
-  return L.divIcon({
-    className: '',
-    html: `<div style="
-      width:16px;height:16px;border-radius:50%;
-      background:#3B82F6;border:3px solid #fff;
-      box-shadow:0 0 0 3px rgba(59,130,246,0.3),0 2px 8px rgba(0,0,0,0.2);
-    "></div>`,
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
-  })
-}
+const gamePinIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:18px;height:18px;border-radius:50%;
+    background:#EF4444;border:3px solid #fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.28);
+    cursor:pointer;
+  "></div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+})
+
+const userDotIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:16px;height:16px;border-radius:50%;
+    background:#3B82F6;border:3px solid #fff;
+    box-shadow:0 0 0 3px rgba(59,130,246,0.3),0 2px 8px rgba(0,0,0,0.2);
+  "></div>`,
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
+})
 
 interface CourtCardProps {
   court: Court
@@ -90,7 +100,9 @@ function CourtCard({ court, distance }: CourtCardProps) {
 
 export default function Courts() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [courts, setCourts] = useState<Court[]>([])
+  const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [sportFilter, setSportFilter] = useState<CourtSport | 'all'>('all')
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
@@ -98,6 +110,7 @@ export default function Courts() {
   useEffect(() => { fetchCourts() }, [sportFilter])
 
   useEffect(() => {
+    fetchUpcomingGames()
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(
       (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
@@ -118,6 +131,18 @@ export default function Courts() {
     const { data } = await query
     setCourts(data ?? [])
     setLoading(false)
+  }
+
+  async function fetchUpcomingGames() {
+    const { data } = await supabase
+      .from('games')
+      .select('id, title, lat, lng, sport, date_time, status')
+      .neq('status', 'cancelled')
+      .gte('date_time', new Date().toISOString())
+      .not('lat', 'is', null)
+      .not('lng', 'is', null)
+
+    setGames((data ?? []) as Game[])
   }
 
   const courtsWithDistance = courts.map(court => ({
@@ -194,8 +219,16 @@ export default function Courts() {
                 </Popup>
               </Marker>
             ))}
+            {games.map(g => (
+              <Marker
+                key={g.id}
+                position={[g.lat!, g.lng!]}
+                icon={gamePinIcon}
+                eventHandlers={{ click: () => navigate(`/games/${g.id}`) }}
+              />
+            ))}
             {userLocation && (
-              <Marker position={[userLocation.lat, userLocation.lng]} icon={userDotIcon()}>
+              <Marker position={[userLocation.lat, userLocation.lng]} icon={userDotIcon}>
                 <Popup>
                   <div className="map-popup">
                     <div className="map-popup-name">You are here</div>
