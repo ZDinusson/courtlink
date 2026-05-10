@@ -120,19 +120,37 @@ export default function GameDetail() {
 
   async function handleShare() {
     if (!game) return
-    const url = window.location.href
-    const shareData = {
-      title: game.title,
-      text: `Join me for ${SPORT_LABEL[game.sport]} at ${game.location}! Spot up on CourtLink.`,
-      url,
-    }
+    const url = `${window.location.origin}/games/${game.id}`
+
     if (navigator.share) {
-      try { await navigator.share(shareData) } catch { /* cancelled */ }
-    } else {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      try {
+        await navigator.share({
+          title: game.title,
+          text: `Join me for ${SPORT_LABEL[game.sport]} at ${game.location}!`,
+          url,
+        })
+        return
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return
+        // fall through to clipboard on any other error
+      }
     }
+
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = url
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.focus()
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
   }
 
   async function handleJoin() {
