@@ -169,12 +169,6 @@
   font-weight: 500;
 }
 
-.game-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
 @media (max-width: 640px) {
   .home-banner {
     padding: 48px 0;
