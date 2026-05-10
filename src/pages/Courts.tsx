@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
@@ -19,6 +19,18 @@ function MapResizer() {
   return null
 }
 
+function MapCenterer({ location }: { location: { lat: number; lng: number } | null }) {
+  const map = useMap()
+  const centered = useRef(false)
+  useEffect(() => {
+    if (location && !centered.current) {
+      centered.current = true
+      map.flyTo([location.lat, location.lng], 13, { duration: 1 })
+    }
+  }, [location, map])
+  return null
+}
+
 const ST_LOUIS: [number, number] = [38.6270, -90.1994]
 const NEAR_MILES = 10
 
@@ -34,22 +46,6 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * 2 * Math.asin(Math.sqrt(a))
 }
 
-function courtIcon(sport: CourtSport) {
-  const color = COURT_SPORT_COLOR[sport]
-  const emoji = COURT_SPORT_EMOJI[sport]
-  return L.divIcon({
-    className: '',
-    html: `<div style="
-      width:36px;height:36px;border-radius:50%;
-      background:${color};border:3px solid #fff;
-      box-shadow:0 2px 8px rgba(0,0,0,0.25);
-      display:flex;align-items:center;justify-content:center;
-      font-size:16px;
-    ">${emoji}</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-  })
-}
 
 const gamePinIcon = L.divIcon({
   className: '',
@@ -145,14 +141,22 @@ export default function Courts() {
   async function fetchUpcomingGames() {
     const { data } = await supabase
       .from('games')
-      .select('id, title, lat, lng, sport, date_time, status')
+      .select('id, title, location, lat, lng, sport, date_time, status')
       .neq('status', 'cancelled')
       .gte('date_time', new Date().toISOString())
       .not('lat', 'is', null)
       .not('lng', 'is', null)
+      .order('date_time', { ascending: true })
 
     setGames((data ?? []) as Game[])
   }
+
+  const gamesWithDistance = games.map(g => ({
+    game: g,
+    distance: userLocation
+      ? haversineDistance(userLocation.lat, userLocation.lng, g.lat!, g.lng!)
+      : null,
+  })).sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
 
   const courtsWithDistance = courts.map(court => ({
     court,
@@ -213,22 +217,11 @@ export default function Courts() {
             className="courts-map"
           >
             <MapResizer />
+            <MapCenterer location={userLocation} />
             <TileLayer
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
-            {courts.map(court => (
-              <Marker key={court.id} position={[court.lat, court.lng]} icon={courtIcon(court.sport)}>
-                <Popup>
-                  <div className="map-popup">
-                    <div className="map-popup-sport">{COURT_SPORT_EMOJI[court.sport]} {COURT_SPORT_LABEL[court.sport]}</div>
-                    <div className="map-popup-name">{court.name}</div>
-                    <div className="map-popup-addr">{court.address}</div>
-                    <Link to={`/courts/${court.id}`} className="map-popup-link">View details →</Link>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
             {games.map(g => (
               <Marker
                 key={g.id}
@@ -248,6 +241,40 @@ export default function Courts() {
             )}
           </MapContainer>
         </div>
+
+        {gamesWithDistance.length > 0 && (
+          <div className="nearby-games-section">
+            <div className="courts-section-header" style={{ marginTop: 24 }}>
+              <span className="courts-section-title">🔴 Upcoming Games</span>
+              <span className="courts-section-sub">{gamesWithDistance.length} scheduled</span>
+            </div>
+            <div className="nearby-games-list">
+              {gamesWithDistance.map(({ game, distance }) => {
+                const dt = new Date(game.date_time)
+                const distLabel = distance !== null
+                  ? distance < 0.1 ? '< 0.1 mi' : `${distance.toFixed(1)} mi away`
+                  : null
+                return (
+                  <Link key={game.id} to={`/games/${game.id}`} className="nearby-game-card card">
+                    <div className="nearby-game-sport" style={{ background: COURT_SPORT_COLOR[game.sport as keyof typeof COURT_SPORT_COLOR] ?? '#F97316' }}>
+                      {COURT_SPORT_EMOJI[game.sport as keyof typeof COURT_SPORT_EMOJI] ?? '🏅'}
+                    </div>
+                    <div className="nearby-game-info">
+                      <div className="nearby-game-title">{game.title}</div>
+                      <div className="nearby-game-meta">
+                        {game.location} · {dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                      </div>
+                      {distLabel && <div className="nearby-game-dist">{distLabel}</div>}
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--text-dim)', flexShrink: 0 }}>
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="courts-loading">

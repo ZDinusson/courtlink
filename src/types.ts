@@ -1,18 +1,24 @@
-export const SPORTS = ['basketball', 'pickleball', 'tennis', 'badminton'] as const
+export const SPORTS = ['basketball', 'soccer', 'volleyball', 'tennis', 'pickleball', 'badminton', 'cricket'] as const
 export type Sport = typeof SPORTS[number]
 
 export const SPORT_EMOJI: Record<Sport, string> = {
   basketball: '🏀',
-  badminton: '🏸',
-  pickleball: '🏓',
+  soccer: '⚽',
+  volleyball: '🏐',
   tennis: '🎾',
+  pickleball: '🏓',
+  badminton: '🏸',
+  cricket: '🏏',
 }
 
 export const SPORT_LABEL: Record<Sport, string> = {
   basketball: 'Basketball',
-  badminton: 'Badminton',
-  pickleball: 'Pickleball',
+  soccer: 'Soccer',
+  volleyball: 'Volleyball',
   tennis: 'Tennis',
+  pickleball: 'Pickleball',
+  badminton: 'Badminton',
+  cricket: 'Cricket',
 }
 
 export interface Profile {
@@ -61,22 +67,22 @@ export interface GamePlayer {
   profiles?: Profile
 }
 
-export const COURT_SPORTS = ['basketball', 'tennis', 'pickleball', 'badminton', 'soccer', 'volleyball'] as const
+export const COURT_SPORTS = ['basketball', 'soccer', 'volleyball', 'tennis', 'pickleball', 'badminton', 'cricket'] as const
 export type CourtSport = typeof COURT_SPORTS[number]
 
 export const COURT_SPORT_EMOJI: Record<CourtSport, string> = {
-  basketball: '🏀', tennis: '🎾', pickleball: '🏓',
-  badminton: '🏸', soccer: '⚽', volleyball: '🏐',
+  basketball: '🏀', soccer: '⚽', volleyball: '🏐',
+  tennis: '🎾', pickleball: '🏓', badminton: '🏸', cricket: '🏏',
 }
 
 export const COURT_SPORT_LABEL: Record<CourtSport, string> = {
-  basketball: 'Basketball', tennis: 'Tennis', pickleball: 'Pickleball',
-  badminton: 'Badminton', soccer: 'Soccer', volleyball: 'Volleyball',
+  basketball: 'Basketball', soccer: 'Soccer', volleyball: 'Volleyball',
+  tennis: 'Tennis', pickleball: 'Pickleball', badminton: 'Badminton', cricket: 'Cricket',
 }
 
 export const COURT_SPORT_COLOR: Record<CourtSport, string> = {
-  basketball: '#F97316', tennis: '#22C55E', pickleball: '#EAB308',
-  badminton: '#3B82F6', soccer: '#16A34A', volleyball: '#8B5CF6',
+  basketball: '#F97316', soccer: '#16A34A', volleyball: '#8B5CF6',
+  tennis: '#22C55E', pickleball: '#EAB308', badminton: '#3B82F6', cricket: '#78716C',
 }
 
 export const COURT_TAGS = [

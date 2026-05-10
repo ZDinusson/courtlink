@@ -284,6 +284,26 @@
   color: var(--text);
 }
 
+.input-error {
+  border-color: var(--danger) !important;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.court-no-results {
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-top: 4px;
+}
+
 @media (max-width: 480px) {
   .create-row {
     grid-template-columns: 1fr;
