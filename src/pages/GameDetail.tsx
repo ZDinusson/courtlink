@@ -36,12 +36,25 @@ export default function GameDetail() {
   const isFull = (game?.player_count ?? 0) >= (game?.player_limit ?? 0)
 
   useEffect(() => {
-    fetchGame()
+    if (!id) return
+    fetchGame(true)
+
+    const channel = supabase
+      .channel(`game-${id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'game_players', filter: `game_id=eq.${id}` }, () => {
+        fetchGame()
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${id}` }, () => {
+        fetchGame()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [id])
 
-  async function fetchGame() {
+  async function fetchGame(showSpinner = false) {
     if (!id) return
-    setLoading(true)
+    if (showSpinner) setLoading(true)
 
     const { data: gameData } = await supabase
       .from('games')
@@ -59,7 +72,7 @@ export default function GameDetail() {
       setGame({ ...gameData, player_count: playersData?.length ?? 0 })
     }
     setPlayers(playersData ?? [])
-    setLoading(false)
+    if (showSpinner) setLoading(false)
   }
 
   async function handleJoin() {
