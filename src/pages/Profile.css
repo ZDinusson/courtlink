@@ -140,6 +140,55 @@
   letter-spacing: 0.04em;
 }
 
+.push-toggle {
+  margin-bottom: 16px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.push-toggle-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.push-toggle-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.push-toggle-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.push-toggle-btn {
+  padding: 7px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.push-toggle-btn--on {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+
 .reputation-card {
   margin-bottom: 16px;
 }

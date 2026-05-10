@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { usePushNotifications } from '../hooks/usePushNotifications'
 import type { Game } from '../types'
 import GameCard from '../components/GameCard'
 import './Profile.css'
@@ -20,6 +21,7 @@ interface PendingRequest {
 }
 
 export default function Profile() {
+  const { supported: pushSupported, permission, subscribed, loading: pushLoading, enable: enablePush, disable: disablePush } = usePushNotifications()
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
@@ -335,6 +337,24 @@ export default function Profile() {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {pushSupported && permission !== 'denied' && (
+          <div className="push-toggle card">
+            <div className="push-toggle-info">
+              <div className="push-toggle-title">Push Notifications</div>
+              <div className="push-toggle-sub">
+                {subscribed ? "You’ll get notified even when the app is closed." : 'Get notified about games, friends, and more.'}
+              </div>
+            </div>
+            <button
+              className={`push-toggle-btn ${subscribed ? 'push-toggle-btn--on' : ''}`}
+              onClick={subscribed ? disablePush : enablePush}
+              disabled={pushLoading}
+            >
+              {pushLoading ? <span className="spinner" style={{ width: 14, height: 14 }} /> : subscribed ? 'On' : 'Enable'}
+            </button>
           </div>
         )}
 
