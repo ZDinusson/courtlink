@@ -56,6 +56,58 @@ export interface GamePlayer {
   profiles?: Profile
 }
 
+export const COURT_SPORTS = ['basketball', 'tennis', 'pickleball', 'badminton', 'soccer', 'volleyball'] as const
+export type CourtSport = typeof COURT_SPORTS[number]
+
+export const COURT_SPORT_EMOJI: Record<CourtSport, string> = {
+  basketball: '🏀', tennis: '🎾', pickleball: '🏓',
+  badminton: '🏸', soccer: '⚽', volleyball: '🏐',
+}
+
+export const COURT_SPORT_LABEL: Record<CourtSport, string> = {
+  basketball: 'Basketball', tennis: 'Tennis', pickleball: 'Pickleball',
+  badminton: 'Badminton', soccer: 'Soccer', volleyball: 'Volleyball',
+}
+
+export const COURT_SPORT_COLOR: Record<CourtSport, string> = {
+  basketball: '#F97316', tennis: '#22C55E', pickleball: '#EAB308',
+  badminton: '#3B82F6', soccer: '#16A34A', volleyball: '#8B5CF6',
+}
+
+export const COURT_TAGS = [
+  'good_lights', 'usually_crowded', 'free_parking', 'indoor',
+  'needs_reservation', 'best_mornings', 'best_afternoons', 'best_evenings', 'best_weekends',
+] as const
+export type CourtTag = typeof COURT_TAGS[number]
+
+export const COURT_TAG_LABEL: Record<CourtTag, string> = {
+  good_lights: 'Good Lights', usually_crowded: 'Usually Crowded',
+  free_parking: 'Free Parking', indoor: 'Indoor',
+  needs_reservation: 'Needs Reservation', best_mornings: 'Best: Mornings',
+  best_afternoons: 'Best: Afternoons', best_evenings: 'Best: Evenings',
+  best_weekends: 'Best: Weekends',
+}
+
+export const COURT_TAG_EMOJI: Record<CourtTag, string> = {
+  good_lights: '💡', usually_crowded: '👥', free_parking: '🅿️',
+  indoor: '🏢', needs_reservation: '📅', best_mornings: '🌅',
+  best_afternoons: '☀️', best_evenings: '🌆', best_weekends: '🗓️',
+}
+
+export interface Court {
+  id: string
+  name: string
+  sport: CourtSport
+  address: string
+  lat: number
+  lng: number
+  description: string | null
+  added_by: string | null
+  created_at: string
+  profiles?: Profile
+  tag_counts?: Partial<Record<CourtTag, number>>
+}
+
 export type Attendance = 'showed_up' | 'no_show'
 
 export interface Rating {

@@ -26,6 +26,12 @@ export default function Navbar() {
           >
             Games
           </Link>
+          <Link
+            to="/courts"
+            className={`navbar-link ${location.pathname.startsWith('/courts') ? 'active' : ''}`}
+          >
+            Courts
+          </Link>
           {user && (
             <Link
               to="/profile"

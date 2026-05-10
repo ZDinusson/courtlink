@@ -1,0 +1,166 @@
+.courtdetail-page {
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+.courtdetail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.courtdetail-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.courtdetail-back:hover {
+  color: var(--text);
+}
+
+.courtdetail-sport-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+.courtdetail-name {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.courtdetail-addr {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.courtdetail-addedby {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.courtdetail-map-wrap {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.courtdetail-map {
+  height: 260px;
+  width: 100%;
+}
+
+.courtdetail-desc {
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.courtdetail-tags-section {
+  margin-bottom: 8px;
+}
+
+.courtdetail-tags-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.courtdetail-tags-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.courtdetail-tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.tag-chip:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.tag-chip.active {
+  background: rgba(249,115,22,0.1);
+  border-color: var(--orange);
+  color: var(--orange);
+  font-weight: 600;
+}
+
+.tag-chip.readonly {
+  cursor: default;
+}
+
+.tag-chip.readonly:hover {
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.tag-chip-count {
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(249,115,22,0.15);
+  color: var(--orange);
+  padding: 0 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.tag-chip:not(.active) .tag-chip-count {
+  background: var(--bg);
+  color: var(--text-dim);
+}
+
+.courtdetail-signin-note {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+.courtdetail-signin-note a {
+  color: var(--orange);
+  text-decoration: none;
+  font-weight: 600;
+}

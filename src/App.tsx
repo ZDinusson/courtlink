@@ -7,6 +7,9 @@ import CreateGame from './pages/CreateGame'
 import GameDetail from './pages/GameDetail'
 import RateGame from './pages/RateGame'
 import Profile from './pages/Profile'
+import Courts from './pages/Courts'
+import AddCourt from './pages/AddCourt'
+import CourtDetail from './pages/CourtDetail'
 
 function AppRoutes() {
   const { user, loading } = useAuth()
@@ -30,6 +33,9 @@ function AppRoutes() {
           <Route path="/games/:id" element={<GameDetail />} />
           <Route path="/games/:id/rate" element={user ? <RateGame /> : <Navigate to="/auth" />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/auth" />} />
+          <Route path="/courts" element={<Courts />} />
+          <Route path="/courts/new" element={user ? <AddCourt /> : <Navigate to="/auth" />} />
+          <Route path="/courts/:id" element={<CourtDetail />} />
         </Routes>
       </main>
     </>

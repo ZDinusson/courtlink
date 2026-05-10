@@ -1,0 +1,153 @@
+.courts-page {
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+.courts-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.courts-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.courts-subtitle {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.courts-sport-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.courts-map-wrap {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.courts-map {
+  height: 420px;
+  width: 100%;
+}
+
+.map-popup {
+  min-width: 160px;
+}
+
+.map-popup-sport {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.map-popup-name {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.map-popup-addr {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.map-popup-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F97316;
+  text-decoration: none;
+}
+
+.courts-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.courts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.courts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.court-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.court-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.court-card-sport {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.court-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.court-card-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.court-card-addr {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.court-card-meta {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+@media (max-width: 480px) {
+  .courts-map { height: 280px; }
+  .courts-title { font-size: 22px; }
+}
