@@ -21,6 +21,16 @@ export interface Profile {
   created_at: string
 }
 
+export const SKILL_LEVELS = ['all', 'beginner', 'intermediate', 'advanced'] as const
+export type SkillLevel = typeof SKILL_LEVELS[number]
+
+export const SKILL_LABEL: Record<SkillLevel, string> = {
+  all: 'All Levels',
+  beginner: 'Beginner',
+  intermediate: 'Intermediate',
+  advanced: 'Advanced',
+}
+
 export interface Game {
   id: string
   created_by: string
@@ -30,6 +40,7 @@ export interface Game {
   player_limit: number
   description: string | null
   sport: Sport
+  skill_level: SkillLevel
   status: 'open' | 'full' | 'cancelled'
   created_at: string
   profiles?: Profile

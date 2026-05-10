@@ -23,14 +23,84 @@
   font-size: 15px;
 }
 
+.find-panel {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.find-panel-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.find-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.find-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.find-filter label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.find-filter select {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.find-filter select:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.find-clear {
+  background: none;
+  border: none;
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.find-clear:hover {
+  text-decoration: underline;
+}
+
 .home-filters {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.home-sport-filters {
   margin-bottom: 20px;
 }
 
@@ -94,5 +164,8 @@
   }
   .home {
     padding-top: 20px;
+  }
+  .find-filters {
+    grid-template-columns: 1fr;
   }
 }

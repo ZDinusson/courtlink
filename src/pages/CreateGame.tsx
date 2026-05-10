@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { SPORTS, SPORT_EMOJI, SPORT_LABEL, type Sport } from '../types'
+import { SPORTS, SPORT_EMOJI, SPORT_LABEL, SKILL_LEVELS, SKILL_LABEL, type Sport, type SkillLevel } from '../types'
 import './CreateGame.css'
 
 export default function CreateGame() {
@@ -11,6 +11,7 @@ export default function CreateGame() {
 
   const [title, setTitle] = useState('')
   const [sport, setSport] = useState<Sport>('basketball')
+  const [skillLevel, setSkillLevel] = useState<SkillLevel>('all')
   const [location, setLocation] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
@@ -35,6 +36,7 @@ export default function CreateGame() {
         created_by: user.id,
         title: title.trim(),
         sport,
+        skill_level: skillLevel,
         location: location.trim(),
         date_time: dateTime,
         player_limit: playerLimit,
@@ -98,6 +100,20 @@ export default function CreateGame() {
                 <option key={s} value={s}>
                   {SPORT_EMOJI[s]} {SPORT_LABEL[s]}
                 </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="skill">Skill Level</label>
+            <select
+              id="skill"
+              value={skillLevel}
+              onChange={e => setSkillLevel(e.target.value as SkillLevel)}
+              className="sport-select"
+            >
+              {SKILL_LEVELS.map(s => (
+                <option key={s} value={s}>{SKILL_LABEL[s]}</option>
               ))}
             </select>
           </div>

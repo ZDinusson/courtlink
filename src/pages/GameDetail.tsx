@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { SPORT_EMOJI, SPORT_LABEL, SPORTS, type Sport, type Game, type GamePlayer, type Comment } from '../types'
+import { SPORT_EMOJI, SPORT_LABEL, SPORTS, SKILL_LABEL, SKILL_LEVELS, type Sport, type SkillLevel, type Game, type GamePlayer, type Comment } from '../types'
 import './GameDetail.css'
 
 function formatDateTime(dateStr: string) {
@@ -29,6 +29,7 @@ export default function GameDetail() {
   const [editDate, setEditDate] = useState('')
   const [editTime, setEditTime] = useState('')
   const [editDescription, setEditDescription] = useState('')
+  const [editSkillLevel, setEditSkillLevel] = useState<SkillLevel>('all')
   const [editLoading, setEditLoading] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
   const [commentBody, setCommentBody] = useState('')
@@ -149,6 +150,7 @@ export default function GameDetail() {
     const d = new Date(game.date_time)
     setEditTitle(game.title)
     setEditSport(game.sport)
+    setEditSkillLevel(game.skill_level)
     setEditLocation(game.location)
     setEditDate(d.toISOString().split('T')[0])
     setEditTime(d.toTimeString().slice(0, 5))
@@ -166,6 +168,7 @@ export default function GameDetail() {
       .update({
         title: editTitle.trim(),
         sport: editSport,
+        skill_level: editSkillLevel,
         location: editLocation.trim(),
         date_time: dateTime,
         description: editDescription.trim() || null,
@@ -230,6 +233,14 @@ export default function GameDetail() {
                 <select id="edit-sport" value={editSport} onChange={e => setEditSport(e.target.value as Sport)}>
                   {SPORTS.map(s => (
                     <option key={s} value={s}>{SPORT_EMOJI[s]} {SPORT_LABEL[s]}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="edit-skill">Skill Level</label>
+                <select id="edit-skill" value={editSkillLevel} onChange={e => setEditSkillLevel(e.target.value as SkillLevel)}>
+                  {SKILL_LEVELS.map(s => (
+                    <option key={s} value={s}>{SKILL_LABEL[s]}</option>
                   ))}
                 </select>
               </div>
@@ -310,6 +321,19 @@ export default function GameDetail() {
                 <div className="detail-meta-value">{formatDateTime(game.date_time)}</div>
               </div>
             </div>
+            {game.skill_level && game.skill_level !== 'all' && (
+              <div className="detail-meta-item">
+                <div className="detail-meta-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                </div>
+                <div>
+                  <div className="detail-meta-label">Skill Level</div>
+                  <div className="detail-meta-value">{SKILL_LABEL[game.skill_level]}</div>
+                </div>
+              </div>
+            )}
           </div>
 
           {game.description && (

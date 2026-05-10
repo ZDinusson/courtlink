@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { SPORT_EMOJI } from '../types'
+import { SPORT_EMOJI, SKILL_LABEL } from '../types'
 import type { Game } from '../types'
 import './GameCard.css'
 
@@ -35,6 +35,9 @@ export default function GameCard({ game }: Props) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span className="game-card-sport">{SPORT_EMOJI[game.sport]}</span>
+          {game.skill_level && game.skill_level !== 'all' && (
+            <span className="badge badge-skill">{SKILL_LABEL[game.skill_level]}</span>
+          )}
           <span className={`badge badge-${game.status}`}>{game.status}</span>
         </div>
       </div>
