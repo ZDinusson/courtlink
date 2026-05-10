@@ -37,6 +37,10 @@ export default function GameDetail() {
   const [copied, setCopied] = useState(false)
   const [waitlist, setWaitlist] = useState<{ id: string; user_id: string; position: number; profiles?: { username: string } }[]>([])
   const [hasRated, setHasRated] = useState<boolean | null>(null)
+  const [friends, setFriends] = useState<{ id: string; username: string }[]>([])
+  const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set())
+  const [showInvite, setShowInvite] = useState(false)
+  const [inviting, setInviting] = useState<string | null>(null)
   const chatBottomRef = useRef<HTMLDivElement>(null)
 
   const isCreator = user?.id === game?.created_by
@@ -53,6 +57,7 @@ export default function GameDetail() {
     fetchComments()
 
     fetchWaitlist()
+    if (user) { fetchFriends(); fetchInvited() }
 
     const channel = supabase
       .channel(`game-${id}`)
@@ -175,6 +180,43 @@ export default function GameDetail() {
       .eq('game_id', id)
       .order('position', { ascending: true })
     setWaitlist((data ?? []) as unknown as typeof waitlist)
+  }
+
+  async function fetchFriends() {
+    if (!user) return
+    const { data: fships } = await supabase
+      .from('friendships')
+      .select('requester_id, addressee_id')
+      .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+      .eq('status', 'accepted')
+    if (!fships || fships.length === 0) { setFriends([]); return }
+    const friendIds = fships.map(f => f.requester_id === user.id ? f.addressee_id : f.requester_id)
+    const { data: profiles } = await supabase.from('profiles').select('id, username').in('id', friendIds)
+    setFriends(profiles ?? [])
+  }
+
+  async function fetchInvited() {
+    if (!id || !user) return
+    const { data } = await supabase
+      .from('notifications')
+      .select('user_id')
+      .eq('game_id', id)
+      .eq('from_user_id', user.id)
+      .eq('type', 'game_invite')
+    setInvitedIds(new Set((data ?? []).map(n => n.user_id)))
+  }
+
+  async function handleInvite(friendId: string) {
+    if (!game || !user) return
+    setInviting(friendId)
+    await supabase.from('notifications').insert({
+      user_id: friendId,
+      type: 'game_invite',
+      from_user_id: user.id,
+      game_id: game.id,
+    })
+    setInvitedIds(prev => new Set([...prev, friendId]))
+    setInviting(null)
   }
 
   async function promoteFromWaitlist() {
@@ -574,6 +616,50 @@ export default function GameDetail() {
               </div>
             ))}
           </div>
+
+          {isCreator && friends.length > 0 && game.status !== 'cancelled' && !isPast && (
+            <div className="invite-section">
+              <button className="invite-toggle" onClick={() => setShowInvite(o => !o)}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <line x1="19" y1="8" x2="19" y2="14"/>
+                  <line x1="22" y1="11" x2="16" y2="11"/>
+                </svg>
+                Invite Friends
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                  style={{ transform: showInvite ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+              {showInvite && (
+                <div className="invite-list">
+                  {friends
+                    .filter(f => !players.some(p => p.user_id === f.id))
+                    .map(f => (
+                      <div key={f.id} className="invite-row">
+                        <div className="invite-avatar">{f.username[0].toUpperCase()}</div>
+                        <span className="invite-name">{f.username}</span>
+                        {invitedIds.has(f.id) ? (
+                          <span className="invite-sent">Invited ✓</span>
+                        ) : (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleInvite(f.id)}
+                            disabled={inviting === f.id}
+                          >
+                            {inviting === f.id ? <span className="spinner" style={{ width: 12, height: 12 }} /> : 'Invite'}
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  {friends.filter(f => !players.some(p => p.user_id === f.id)).length === 0 && (
+                    <div className="invite-empty">All your friends have already joined.</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {error && <p className="error-msg" style={{ marginTop: 12 }}>{error}</p>}
 

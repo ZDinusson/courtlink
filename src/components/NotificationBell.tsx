@@ -54,6 +54,12 @@ function notifText(n: Notif): React.ReactNode {
       {n.games?.title ? <> · <span className="notif-game">{n.games.title}</span></> : ''}
     </>
   )
+  if (n.type === 'game_invite') return (
+    <>
+      {name} invited you to play
+      {n.games?.title ? <> · <span className="notif-game">{n.games.title}</span></> : ''}
+    </>
+  )
   return (
     <>
       {name} joined your game
