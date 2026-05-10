@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import GameCard from '../components/GameCard'
 import { SPORTS, SPORT_EMOJI, SPORT_LABEL, SKILL_LEVELS, SKILL_LABEL, type Sport, type SkillLevel, type Game } from '../types'
 import { haversineDistance } from '../utils/distance'
-import { gamePinIcon, userDotIcon } from '../utils/mapIcons'
-import 'leaflet/dist/leaflet.css'
 import './Home.css'
 
 type StatusFilter = 'open' | 'all'
@@ -43,7 +40,6 @@ const DATE_OPTIONS = buildDateOptions()
 
 export default function Home() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open')
@@ -244,31 +240,6 @@ export default function Home() {
             All Upcoming
           </button>
         </div>
-
-        {userLocation && filteredGames.some(g => g.lat != null) && (
-          <div className="home-map-wrap">
-            <MapContainer
-              center={[userLocation.lat, userLocation.lng]}
-              zoom={12}
-              className="home-map"
-              zoomControl={false}
-            >
-              <TileLayer
-                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-              />
-              {filteredGames.filter(g => g.lat != null).map(g => (
-                <Marker
-                  key={g.id}
-                  position={[g.lat!, g.lng!]}
-                  icon={gamePinIcon}
-                  eventHandlers={{ click: () => navigate(`/games/${g.id}`) }}
-                />
-              ))}
-              <Marker position={[userLocation.lat, userLocation.lng]} icon={userDotIcon} />
-            </MapContainer>
-          </div>
-        )}
 
         {loading ? (
           <div className="home-loading">
