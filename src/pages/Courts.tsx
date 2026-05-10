@@ -141,7 +141,7 @@ export default function Courts() {
   async function fetchUpcomingGames() {
     const { data } = await supabase
       .from('games')
-      .select('id, title, location, lat, lng, sport, date_time, status')
+      .select('id, title, location, lat, lng, sport, date_time, status, court_id')
       .neq('status', 'cancelled')
       .gte('date_time', new Date().toISOString())
       .not('lat', 'is', null)
@@ -158,7 +158,9 @@ export default function Courts() {
       : null,
   })).sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
 
-  const courtsWithDistance = courts.map(court => ({
+  const courtsWithGames = new Set(games.map(g => g.court_id).filter(Boolean))
+
+  const courtsWithDistance = courts.filter(c => courtsWithGames.has(c.id)).map(court => ({
     court,
     distance: userLocation
       ? haversineDistance(userLocation.lat, userLocation.lng, court.lat, court.lng)
