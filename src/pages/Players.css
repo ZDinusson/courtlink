@@ -1,0 +1,146 @@
+.players-page {
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+.players-header {
+  margin-bottom: 24px;
+}
+
+.players-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.players-sub {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.players-search-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.players-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.players-search-input {
+  width: 100%;
+  padding: 12px 40px 12px 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 15px;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.players-search-input:focus {
+  border-color: var(--orange);
+}
+
+.players-search-clear {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.players-search-clear:hover {
+  color: var(--text);
+}
+
+.players-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.players-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 40px 0;
+}
+
+.players-list {
+  padding: 0;
+  overflow: hidden;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.player-row:last-child {
+  border-bottom: none;
+}
+
+.player-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text);
+  min-width: 0;
+}
+
+.player-row-left:hover .player-username {
+  text-decoration: underline;
+}
+
+.player-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), #FBBF24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.player-username {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-actions {
+  flex-shrink: 0;
+}
+
+.player-friends-btn {
+  color: var(--text-muted);
+  font-size: 13px;
+}

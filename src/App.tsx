@@ -14,6 +14,7 @@ import UserProfile from './pages/UserProfile'
 import Landing from './pages/Landing'
 import Messages from './pages/Messages'
 import DMThread from './pages/DMThread'
+import Players from './pages/Players'
 
 function AppRoutes() {
   const { user, loading } = useAuth()
@@ -43,6 +44,7 @@ function AppRoutes() {
           <Route path="/users/:id" element={<UserProfile />} />
           <Route path="/messages" element={user ? <Messages /> : <Navigate to="/auth" />} />
           <Route path="/messages/:userId" element={user ? <DMThread /> : <Navigate to="/auth" />} />
+          <Route path="/players" element={<Players />} />
         </Routes>
       </main>
     </>

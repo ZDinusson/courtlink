@@ -34,6 +34,12 @@ export default function Navbar() {
           >
             Courts
           </Link>
+          <Link
+            to="/players"
+            className={`navbar-link ${location.pathname === '/players' ? 'active' : ''}`}
+          >
+            Players
+          </Link>
           {user && (
             <Link
               to="/profile"
