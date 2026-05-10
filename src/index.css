@@ -50,7 +50,7 @@ body {
 
 @media (max-width: 600px) {
   .main-content {
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px) + 16px);
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 16px));
   }
 }
 
