@@ -6,7 +6,7 @@ import type { Game } from '../types'
 import GameCard from '../components/GameCard'
 import './Profile.css'
 
-type Tab = 'hosting' | 'joined'
+type Tab = 'hosting' | 'joined' | 'past'
 
 interface FriendProfile {
   id: string
@@ -73,13 +73,14 @@ export default function Profile() {
         .from('games')
         .select('*, profiles (id, username), game_players (id)')
         .eq('created_by', user.id)
-        .order('date_time', { ascending: false })
+        .gte('date_time', new Date().toISOString())
+        .order('date_time', { ascending: true })
 
       setGames((data ?? []).map((g: Game & { game_players: { id: string }[] }) => ({
         ...g,
         player_count: g.game_players?.length ?? 0,
       })))
-    } else {
+    } else if (tab === 'joined') {
       const { data: joined } = await supabase
         .from('game_players')
         .select('game_id')
@@ -95,12 +96,37 @@ export default function Profile() {
           .select('*, profiles (id, username), game_players (id)')
           .in('id', ids)
           .neq('created_by', user.id)
-          .order('date_time', { ascending: false })
+          .gte('date_time', new Date().toISOString())
+          .order('date_time', { ascending: true })
 
         setGames((data ?? []).map((g: Game & { game_players: { id: string }[] }) => ({
           ...g,
           player_count: g.game_players?.length ?? 0,
           is_joined: true,
+        })))
+      }
+    } else {
+      // Past: all games (hosted or joined) before now
+      const { data: joined } = await supabase
+        .from('game_players')
+        .select('game_id')
+        .eq('user_id', user.id)
+
+      const ids = (joined ?? []).map((j: { game_id: string }) => j.game_id)
+
+      if (ids.length === 0) {
+        setGames([])
+      } else {
+        const { data } = await supabase
+          .from('games')
+          .select('*, profiles (id, username), game_players (id)')
+          .in('id', ids)
+          .lt('date_time', new Date().toISOString())
+          .order('date_time', { ascending: false })
+
+        setGames((data ?? []).map((g: Game & { game_players: { id: string }[] }) => ({
+          ...g,
+          player_count: g.game_players?.length ?? 0,
         })))
       }
     }
@@ -315,6 +341,12 @@ export default function Profile() {
           >
             Joined
           </button>
+          <button
+            className={`tab-btn ${tab === 'past' ? 'active' : ''}`}
+            onClick={() => setTab('past')}
+          >
+            Past
+          </button>
         </div>
 
         {loading ? (
@@ -324,11 +356,13 @@ export default function Profile() {
         ) : games.length === 0 ? (
           <div className="profile-empty">
             <p className="profile-empty-text">
-              {tab === 'hosting' ? "You haven't hosted any games yet." : "You haven't joined any games yet."}
+              {tab === 'hosting' ? "No upcoming games you're hosting." : tab === 'joined' ? "No upcoming games you've joined." : "No past games yet."}
             </p>
-            <Link to={tab === 'hosting' ? '/games/new' : '/'} className="btn btn-primary">
-              {tab === 'hosting' ? 'Host a Game' : 'Browse Games'}
-            </Link>
+            {tab !== 'past' && (
+              <Link to={tab === 'hosting' ? '/games/new' : '/'} className="btn btn-primary">
+                {tab === 'hosting' ? 'Host a Game' : 'Browse Games'}
+              </Link>
+            )}
           </div>
         ) : (
           <div className="game-grid">
