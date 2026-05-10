@@ -8,35 +8,11 @@ import './Home.css'
 
 type StatusFilter = 'open' | 'all'
 type SportFilter = Sport | 'all'
-type WhenFilter = 'any' | 'tonight' | 'tomorrow' | 'weekend'
-
-function getTimeRange(when: WhenFilter): { start: string; end: string } | null {
-  const now = new Date()
-  if (when === 'tonight') {
-    const end = new Date(now)
-    end.setHours(23, 59, 59, 999)
-    return { start: now.toISOString(), end: end.toISOString() }
-  }
-  if (when === 'tomorrow') {
-    const start = new Date(now)
-    start.setDate(start.getDate() + 1)
-    start.setHours(0, 0, 0, 0)
-    const end = new Date(start)
-    end.setHours(23, 59, 59, 999)
-    return { start: start.toISOString(), end: end.toISOString() }
-  }
-  if (when === 'weekend') {
-    const day = now.getDay()
-    const daysToSat = day === 6 ? 0 : 6 - day
-    const start = new Date(now)
-    start.setDate(start.getDate() + daysToSat)
-    start.setHours(0, 0, 0, 0)
-    const end = new Date(start)
-    end.setDate(end.getDate() + 1)
-    end.setHours(23, 59, 59, 999)
-    return { start: start.toISOString(), end: end.toISOString() }
-  }
-  return null
+function getTimeRange(dateStr: string): { start: string; end: string } | null {
+  if (!dateStr) return null
+  const start = new Date(`${dateStr}T00:00:00`)
+  const end = new Date(`${dateStr}T23:59:59.999`)
+  return { start: start.toISOString(), end: end.toISOString() }
 }
 
 export default function Home() {
@@ -45,7 +21,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('open')
   const [sportFilter, setSportFilter] = useState<SportFilter>('all')
-  const [whenFilter, setWhenFilter] = useState<WhenFilter>('any')
+  const [whenFilter, setWhenFilter] = useState('')
   const [skillFilter, setSkillFilter] = useState<SkillLevel | 'any'>('any')
 
   useEffect(() => {
@@ -71,6 +47,7 @@ export default function Home() {
     } else {
       query = query.gte('date_time', new Date().toISOString())
     }
+
 
     if (sportFilter !== 'all') query = query.eq('sport', sportFilter)
     if (skillFilter !== 'any') query = query.eq('skill_level', skillFilter)
@@ -99,11 +76,11 @@ export default function Home() {
     setLoading(false)
   }
 
-  const hasActiveFilters = sportFilter !== 'all' || whenFilter !== 'any' || skillFilter !== 'any'
+  const hasActiveFilters = sportFilter !== 'all' || whenFilter !== '' || skillFilter !== 'any'
 
   function clearFilters() {
     setSportFilter('all')
-    setWhenFilter('any')
+    setWhenFilter('')
     setSkillFilter('any')
   }
 
@@ -141,12 +118,13 @@ export default function Home() {
             </div>
             <div className="find-filter">
               <label>When</label>
-              <select value={whenFilter} onChange={e => setWhenFilter(e.target.value as WhenFilter)}>
-                <option value="any">Any time</option>
-                <option value="tonight">Tonight</option>
-                <option value="tomorrow">Tomorrow</option>
-                <option value="weekend">This weekend</option>
-              </select>
+              <input
+                type="date"
+                value={whenFilter}
+                min={new Date().toISOString().split('T')[0]}
+                onChange={e => setWhenFilter(e.target.value)}
+                className="find-date-input"
+              />
             </div>
             <div className="find-filter">
               <label>Skill</label>

@@ -95,6 +95,30 @@
   border-color: var(--orange);
 }
 
+.find-date-input {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.find-date-input:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.find-date-input::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
 .find-clear {
   background: none;
   border: none;
