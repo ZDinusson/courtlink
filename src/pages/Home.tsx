@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { MapContainer, TileLayer, Marker } from 'react-leaflet'
-import L from 'leaflet'
+import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import GameCard from '../components/GameCard'
@@ -41,47 +39,6 @@ function getTimeRange(when: WhenFilter): { start: string; end: string } | null {
   return null
 }
 
-const gamePinIcon = L.divIcon({
-  className: '',
-  html: `<div style="
-    width:18px;height:18px;border-radius:50%;
-    background:#EF4444;border:3px solid #fff;
-    box-shadow:0 2px 8px rgba(0,0,0,0.28);
-    cursor:pointer;
-  "></div>`,
-  iconSize: [18, 18],
-  iconAnchor: [9, 9],
-})
-
-const userDotIcon = L.divIcon({
-  className: '',
-  html: `<div style="
-    width:16px;height:16px;border-radius:50%;
-    background:#3B82F6;border:3px solid #fff;
-    box-shadow:0 0 0 3px rgba(59,130,246,0.3),0 2px 8px rgba(0,0,0,0.2);
-  "></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-})
-
-function GameMapPins({ games }: { games: Game[] }) {
-  const navigate = useNavigate()
-  const pinned = games.filter(g => g.lat && g.lng)
-
-  return (
-    <>
-      {pinned.map(g => (
-        <Marker
-          key={g.id}
-          position={[g.lat!, g.lng!]}
-          icon={gamePinIcon}
-          eventHandlers={{ click: () => navigate(`/games/${g.id}`) }}
-        />
-      ))}
-    </>
-  )
-}
-
 export default function Home() {
   const { user } = useAuth()
   const [games, setGames] = useState<Game[]>([])
@@ -90,20 +47,10 @@ export default function Home() {
   const [sportFilter, setSportFilter] = useState<SportFilter>('all')
   const [whenFilter, setWhenFilter] = useState<WhenFilter>('any')
   const [skillFilter, setSkillFilter] = useState<SkillLevel | 'any'>('any')
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
 
   useEffect(() => {
     fetchGames()
   }, [statusFilter, sportFilter, whenFilter, skillFilter])
-
-  useEffect(() => {
-    if (!navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(
-      pos => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => {},
-      { timeout: 8000 }
-    )
-  }, [])
 
   async function fetchGames() {
     setLoading(true)
@@ -161,37 +108,20 @@ export default function Home() {
   }
 
   const emptyIcon = sportFilter !== 'all' ? SPORT_EMOJI[sportFilter] : '🔍'
-  const pinnedGames = games.filter(g => g.lat && g.lng)
 
   return (
     <div className="home">
-      <section className="home-map-section">
-        <MapContainer
-          center={[38.627, -90.199]}
-          zoom={12}
-          className="home-map"
-          zoomControl={false}
-        >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
-          />
-          <GameMapPins games={games} />
-          {userLocation && (
-            <Marker position={[userLocation.lat, userLocation.lng]} icon={userDotIcon} />
-          )}
-        </MapContainer>
-
-        <div className="home-map-overlay">
-          <div className="home-map-title">Find a Game</div>
-          <div className="home-map-sub">
-            {pinnedGames.length > 0
-              ? `${pinnedGames.length} game${pinnedGames.length !== 1 ? 's' : ''} on the map`
-              : 'Pickup games near you'}
+      <section className="home-banner">
+        <div className="container">
+          <div className="home-banner-inner">
+            <div>
+              <h1 className="home-banner-title">Find a Game</h1>
+              <p className="home-banner-sub">Pickup games happening near you</p>
+            </div>
+            <Link to={user ? '/games/new' : '/auth'} className="btn btn-primary btn-lg home-banner-cta">
+              {user ? '+ Host a Game' : 'Get Started'}
+            </Link>
           </div>
-          <Link to={user ? '/games/new' : '/auth'} className="btn btn-primary btn-sm">
-            {user ? '+ Host a Game' : 'Get Started'}
-          </Link>
         </div>
       </section>
 

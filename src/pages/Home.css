@@ -1,42 +1,33 @@
-.home-map-section {
-  position: relative;
-  height: 380px;
-  overflow: hidden;
+.home-banner {
+  background: #0C0C0C;
+  padding: 64px 0;
 }
 
-.home-map {
-  height: 100%;
-  width: 100%;
-}
-
-.home-map-overlay {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  border-radius: var(--radius);
-  padding: 16px 20px;
+.home-banner-inner {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 400;
-  max-width: 260px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
 }
 
-.home-map-title {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  color: var(--text);
+.home-banner-title {
+  font-size: 60px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: #fff;
   line-height: 1;
+  margin-bottom: 14px;
 }
 
-.home-map-sub {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
+.home-banner-sub {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.home-banner-cta {
+  flex-shrink: 0;
 }
 
 .home-body {
@@ -179,16 +170,19 @@
 }
 
 @media (max-width: 640px) {
-  .home-map-section {
-    height: 280px;
+  .home-banner {
+    padding: 48px 0;
   }
-  .home-map-overlay {
-    bottom: 12px;
-    left: 12px;
-    padding: 12px 14px;
+  .home-banner-title {
+    font-size: 40px;
   }
-  .home-map-title {
-    font-size: 17px;
+  .home-banner-sub {
+    font-size: 15px;
+  }
+  .home-banner-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
   }
   .find-filters {
     grid-template-columns: 1fr;
