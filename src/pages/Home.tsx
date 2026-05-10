@@ -118,13 +118,16 @@ export default function Home() {
             </div>
             <div className="find-filter">
               <label>When</label>
-              <input
-                type="date"
-                value={whenFilter}
-                min={new Date().toISOString().split('T')[0]}
-                onChange={e => setWhenFilter(e.target.value)}
-                className="find-date-input"
-              />
+              <div className="find-date-wrap">
+                <input
+                  type="date"
+                  value={whenFilter}
+                  min={new Date().toISOString().split('T')[0]}
+                  onChange={e => setWhenFilter(e.target.value)}
+                  className={`find-date-input${!whenFilter ? ' find-date-empty' : ''}`}
+                />
+                {!whenFilter && <span className="find-date-placeholder">Any time</span>}
+              </div>
             </div>
             <div className="find-filter">
               <label>Skill</label>

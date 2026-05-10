@@ -95,6 +95,10 @@
   border-color: var(--orange);
 }
 
+.find-date-wrap {
+  position: relative;
+}
+
 .find-date-input {
   width: 100%;
   padding: 10px 14px;
@@ -107,6 +111,7 @@
   font-family: inherit;
   cursor: pointer;
   transition: border-color 0.15s;
+  height: 43px;
 }
 
 .find-date-input:focus {
@@ -117,6 +122,21 @@
 .find-date-input::-webkit-calendar-picker-indicator {
   opacity: 0.5;
   cursor: pointer;
+}
+
+.find-date-empty::-webkit-datetime-edit {
+  color: transparent;
+}
+
+.find-date-placeholder {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  pointer-events: none;
 }
 
 .find-clear {
