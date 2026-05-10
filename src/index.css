@@ -288,4 +288,15 @@ input, textarea, select {
   .card {
     padding: 16px;
   }
+  /* Prevent iOS auto-zoom on form inputs */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  /* Minimum 44px tap targets */
+  .btn {
+    min-height: 44px;
+  }
+  .btn-sm {
+    min-height: 36px;
+  }
 }

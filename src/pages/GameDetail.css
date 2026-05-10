@@ -444,9 +444,29 @@
   gap: 14px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .detail-title {
     font-size: 22px;
+  }
+  .detail-top {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .detail-actions {
+    flex-direction: column;
+  }
+  .detail-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .detail-rate-prompt {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .detail-rate-prompt .btn {
+    width: 100%;
+    justify-content: center;
   }
   .create-row {
     grid-template-columns: 1fr;
@@ -456,5 +476,16 @@
   }
   .edit-actions .btn {
     width: 100%;
+  }
+  .chat-messages {
+    max-height: 280px;
+  }
+  .chat-send {
+    width: 44px;
+    height: 44px;
+  }
+  .quick-reply {
+    padding: 8px 14px;
+    font-size: 13px;
   }
 }

@@ -103,3 +103,15 @@
   padding: 10px 14px;
   border-radius: var(--radius);
 }
+
+@media (max-width: 600px) {
+  .addcourt-form {
+    padding: 20px 16px;
+  }
+  .addcourt-actions {
+    flex-direction: column-reverse;
+  }
+  .addcourt-actions .btn {
+    width: 100%;
+  }
+}

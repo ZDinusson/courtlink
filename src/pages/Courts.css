@@ -225,8 +225,17 @@
   font-size: 11px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .courts-map { height: 300px; }
-  .courts-title { font-size: 22px; }
+  .courts-title { font-size: 24px; }
   .courts-list--near { padding: 6px; }
+  .courts-hero {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .courts-hero .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
