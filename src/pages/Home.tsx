@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import L from 'leaflet'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import GameCard from '../components/GameCard'
@@ -37,6 +39,40 @@ function getTimeRange(when: WhenFilter): { start: string; end: string } | null {
     return { start: start.toISOString(), end: end.toISOString() }
   }
   return null
+}
+
+function makeGameIcon(sport: Sport) {
+  const emoji = SPORT_EMOJI[sport]
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:38px;height:38px;border-radius:50%;
+      background:#F97316;border:3px solid #fff;
+      box-shadow:0 2px 10px rgba(0,0,0,0.25);
+      display:flex;align-items:center;justify-content:center;
+      font-size:17px;cursor:pointer;
+    ">${emoji}</div>`,
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+  })
+}
+
+function GameMapPins({ games }: { games: Game[] }) {
+  const navigate = useNavigate()
+  const pinned = games.filter(g => g.lat && g.lng)
+
+  return (
+    <>
+      {pinned.map(g => (
+        <Marker
+          key={g.id}
+          position={[g.lat!, g.lng!]}
+          icon={makeGameIcon(g.sport)}
+          eventHandlers={{ click: () => navigate(`/games/${g.id}`) }}
+        />
+      ))}
+    </>
+  )
 }
 
 export default function Home() {
@@ -108,20 +144,34 @@ export default function Home() {
   }
 
   const emptyIcon = sportFilter !== 'all' ? SPORT_EMOJI[sportFilter] : '🔍'
+  const pinnedGames = games.filter(g => g.lat && g.lng)
 
   return (
     <div className="home">
-      <section className="home-banner">
-        <div className="container">
-          <div className="home-banner-inner">
-            <div>
-              <h1 className="home-banner-title">Find a Game</h1>
-              <p className="home-banner-sub">Pickup games happening near you</p>
-            </div>
-            <Link to={user ? '/games/new' : '/auth'} className="btn btn-primary btn-lg home-banner-cta">
-              {user ? '+ Host a Game' : 'Get Started'}
-            </Link>
+      <section className="home-map-section">
+        <MapContainer
+          center={[38.627, -90.199]}
+          zoom={12}
+          className="home-map"
+          zoomControl={false}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
+          />
+          <GameMapPins games={games} />
+        </MapContainer>
+
+        <div className="home-map-overlay">
+          <div className="home-map-title">Find a Game</div>
+          <div className="home-map-sub">
+            {pinnedGames.length > 0
+              ? `${pinnedGames.length} game${pinnedGames.length !== 1 ? 's' : ''} on the map`
+              : 'Pickup games near you'}
           </div>
+          <Link to={user ? '/games/new' : '/auth'} className="btn btn-primary btn-sm">
+            {user ? '+ Host a Game' : 'Get Started'}
+          </Link>
         </div>
       </section>
 
@@ -209,4 +259,3 @@ export default function Home() {
     </div>
   )
 }
-

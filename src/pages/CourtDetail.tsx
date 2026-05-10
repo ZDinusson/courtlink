@@ -4,10 +4,11 @@ import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import GameCard from '../components/GameCard'
 import {
   COURT_SPORT_EMOJI, COURT_SPORT_LABEL, COURT_SPORT_COLOR,
   COURT_TAGS, COURT_TAG_LABEL, COURT_TAG_EMOJI,
-  type Court, type CourtTag,
+  type Court, type CourtTag, type Game,
 } from '../types'
 import './CourtDetail.css'
 
@@ -36,8 +37,9 @@ export default function CourtDetail() {
   const [myTags, setMyTags] = useState<Set<CourtTag>>(new Set())
   const [tagCounts, setTagCounts] = useState<Partial<Record<CourtTag, number>>>({})
   const [toggling, setToggling] = useState<CourtTag | null>(null)
+  const [courtGames, setCourtGames] = useState<Game[]>([])
 
-  useEffect(() => { fetchCourt() }, [id])
+  useEffect(() => { fetchCourt(); fetchCourtGames() }, [id])
 
   async function fetchCourt() {
     if (!id) return
@@ -76,6 +78,25 @@ export default function CourtDetail() {
     }
 
     setLoading(false)
+  }
+
+  async function fetchCourtGames() {
+    if (!id) return
+    const { data } = await supabase
+      .from('games')
+      .select('*, profiles (id, username), game_players (id)')
+      .eq('court_id', id)
+      .neq('status', 'cancelled')
+      .gte('date_time', new Date().toISOString())
+      .order('date_time', { ascending: true })
+      .limit(6)
+
+    if (data) {
+      setCourtGames(data.map((g: Game & { game_players: { id: string }[] }) => ({
+        ...g,
+        player_count: g.game_players?.length ?? 0,
+      })))
+    }
   }
 
   async function toggleTag(tag: CourtTag) {
@@ -187,6 +208,20 @@ export default function CourtDetail() {
             </p>
           )}
         </div>
+
+        {courtGames.length > 0 && (
+          <div className="courtdetail-games-section">
+            <div className="courtdetail-games-header">
+              <div className="courtdetail-games-title">Upcoming Games Here</div>
+              <Link to={`/?court=${id}`} className="courtdetail-games-link" onClick={e => { e.preventDefault(); navigate('/') }}>
+                See all
+              </Link>
+            </div>
+            <div className="game-grid">
+              {courtGames.map(g => <GameCard key={g.id} game={g} />)}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

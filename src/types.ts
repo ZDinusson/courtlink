@@ -43,7 +43,11 @@ export interface Game {
   skill_level: SkillLevel
   status: 'open' | 'full' | 'cancelled'
   created_at: string
+  court_id?: string | null
+  lat?: number | null
+  lng?: number | null
   profiles?: Profile
+  courts?: { id: string; name: string } | null
   player_count?: number
   is_joined?: boolean
 }

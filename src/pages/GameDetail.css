@@ -489,3 +489,13 @@
     font-size: 13px;
   }
 }
+
+.detail-court-link {
+  color: var(--orange);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.detail-court-link:hover {
+  text-decoration: underline;
+}

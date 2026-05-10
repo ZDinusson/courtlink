@@ -69,7 +69,7 @@ export default function GameDetail() {
 
     const { data: gameData } = await supabase
       .from('games')
-      .select('*, profiles (id, username)')
+      .select('*, profiles (id, username), courts (id, name)')
       .eq('id', id)
       .single()
 
@@ -313,7 +313,13 @@ export default function GameDetail() {
               </div>
               <div>
                 <div className="detail-meta-label">Location</div>
-                <div className="detail-meta-value">{game.location}</div>
+                <div className="detail-meta-value">
+                  {game.court_id ? (
+                    <Link to={`/courts/${game.court_id}`} className="detail-court-link">
+                      {game.location}
+                    </Link>
+                  ) : game.location}
+                </div>
               </div>
             </div>
             <div className="detail-meta-item">

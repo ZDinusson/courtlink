@@ -1,9 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { SPORTS, SPORT_EMOJI, SPORT_LABEL, SKILL_LEVELS, SKILL_LABEL, type Sport, type SkillLevel } from '../types'
 import './CreateGame.css'
+
+interface CourtResult {
+  id: string
+  name: string
+  address: string
+  lat: number
+  lng: number
+}
 
 export default function CreateGame() {
   const { user } = useAuth()
@@ -20,7 +28,39 @@ export default function CreateGame() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  const [courtQuery, setCourtQuery] = useState('')
+  const [courtResults, setCourtResults] = useState<CourtResult[]>([])
+  const [selectedCourt, setSelectedCourt] = useState<CourtResult | null>(null)
+
   const minDate = new Date().toISOString().split('T')[0]
+
+  useEffect(() => {
+    if (!courtQuery.trim() || selectedCourt) {
+      setCourtResults([])
+      return
+    }
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from('courts')
+        .select('id, name, address, lat, lng')
+        .ilike('name', `%${courtQuery}%`)
+        .limit(6)
+      setCourtResults(data ?? [])
+    }, 250)
+    return () => clearTimeout(timer)
+  }, [courtQuery, selectedCourt])
+
+  function selectCourt(c: CourtResult) {
+    setSelectedCourt(c)
+    setLocation(c.name)
+    setCourtQuery('')
+    setCourtResults([])
+  }
+
+  function clearCourt() {
+    setSelectedCourt(null)
+    setLocation('')
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -42,6 +82,9 @@ export default function CreateGame() {
         player_limit: playerLimit,
         description: description.trim() || null,
         status: 'open',
+        court_id: selectedCourt?.id ?? null,
+        lat: selectedCourt?.lat ?? null,
+        lng: selectedCourt?.lng ?? null,
       })
       .select()
       .single()
@@ -52,7 +95,6 @@ export default function CreateGame() {
       return
     }
 
-    // Auto-join the creator
     await supabase.from('game_players').insert({
       game_id: data.id,
       user_id: user.id,
@@ -119,7 +161,45 @@ export default function CreateGame() {
           </div>
 
           <div className="field">
-            <label htmlFor="location">Location / Court</label>
+            <label>Court (optional)</label>
+            {selectedCourt ? (
+              <div className="court-selected">
+                <div className="court-selected-info">
+                  <div className="court-selected-name">{selectedCourt.name}</div>
+                  <div className="court-selected-addr">{selectedCourt.address}</div>
+                </div>
+                <button type="button" className="court-selected-clear" onClick={clearCourt}>×</button>
+              </div>
+            ) : (
+              <div className="court-search-wrap">
+                <input
+                  type="text"
+                  placeholder="Search courts..."
+                  value={courtQuery}
+                  onChange={e => setCourtQuery(e.target.value)}
+                  autoComplete="off"
+                />
+                {courtResults.length > 0 && (
+                  <div className="court-dropdown">
+                    {courtResults.map(c => (
+                      <button
+                        type="button"
+                        key={c.id}
+                        className="court-option"
+                        onClick={() => selectCourt(c)}
+                      >
+                        <span className="court-option-name">{c.name}</span>
+                        <span className="court-option-addr">{c.address}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="field">
+            <label htmlFor="location">Location</label>
             <input
               id="location"
               type="text"
