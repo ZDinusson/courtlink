@@ -12,7 +12,7 @@
 }
 
 .courts-title {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -0.03em;
   margin-bottom: 4px;
@@ -27,18 +27,43 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.courts-sport-filters .filter-btn {
+  padding: 7px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.courts-sport-filters .filter-btn:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.courts-sport-filters .filter-btn.active {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.25);
 }
 
 .courts-map-wrap {
   border-radius: var(--radius);
   overflow: hidden;
   border: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
 }
 
 .courts-map {
-  height: 420px;
+  height: 500px;
   width: 100%;
 }
 
@@ -67,8 +92,12 @@
 .map-popup-link {
   font-size: 13px;
   font-weight: 600;
-  color: #F97316;
+  color: var(--orange);
   text-decoration: none;
+}
+
+.map-popup-link:hover {
+  text-decoration: underline;
 }
 
 .courts-loading {
@@ -88,10 +117,50 @@
   font-size: 15px;
 }
 
+.courts-section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 12px;
+  margin-top: 4px;
+}
+
+.courts-section-header--all {
+  margin-top: 28px;
+}
+
+.courts-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.courts-section-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 .courts-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.courts-list--near {
+  background: var(--orange-light);
+  border-radius: var(--radius);
+  padding: 8px;
+  margin-bottom: 4px;
+}
+
+.courts-list--near .court-card {
+  border-color: rgba(249, 115, 22, 0.15);
+}
+
+.courts-list--near .court-card:hover {
+  border-color: rgba(249, 115, 22, 0.3);
 }
 
 .court-card {
@@ -145,9 +214,19 @@
 .court-card-meta {
   font-size: 12px;
   color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.court-card-dist {
+  color: var(--orange);
+  font-weight: 600;
+  font-size: 11px;
 }
 
 @media (max-width: 480px) {
-  .courts-map { height: 280px; }
+  .courts-map { height: 300px; }
   .courts-title { font-size: 22px; }
+  .courts-list--near { padding: 6px; }
 }
