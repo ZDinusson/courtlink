@@ -35,12 +35,15 @@ export default function GameDetail() {
   const [commentBody, setCommentBody] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [waitlist, setWaitlist] = useState<{ id: string; user_id: string; position: number; profiles?: { username: string } }[]>([])
   const chatBottomRef = useRef<HTMLDivElement>(null)
 
   const isCreator = user?.id === game?.created_by
   const isJoined = players.some(p => p.user_id === user?.id)
   const isFull = (game?.player_count ?? 0) >= (game?.player_limit ?? 0)
   const isPast = game ? new Date(game.date_time) < new Date() : false
+  const isWaitlisted = waitlist.some(w => w.user_id === user?.id)
+  const myWaitlistPosition = waitlist.find(w => w.user_id === user?.id)?.position ?? null
 
   useEffect(() => {
     if (!id) return
@@ -48,10 +51,15 @@ export default function GameDetail() {
 
     fetchComments()
 
+    fetchWaitlist()
+
     const channel = supabase
       .channel(`game-${id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'game_players', filter: `game_id=eq.${id}` }, () => {
         fetchGame()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'waitlist', filter: `game_id=eq.${id}` }, () => {
+        fetchWaitlist()
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${id}` }, () => {
         fetchGame()
@@ -153,6 +161,69 @@ export default function GameDetail() {
     setTimeout(() => setCopied(false), 2500)
   }
 
+  async function fetchWaitlist() {
+    if (!id) return
+    const { data } = await supabase
+      .from('waitlist')
+      .select('id, user_id, position, profiles (username)')
+      .eq('game_id', id)
+      .order('position', { ascending: true })
+    setWaitlist((data ?? []) as unknown as typeof waitlist)
+  }
+
+  async function promoteFromWaitlist() {
+    if (!id) return
+    const { data: first } = await supabase
+      .from('waitlist')
+      .select('id, user_id, position')
+      .eq('game_id', id)
+      .order('position', { ascending: true })
+      .limit(1)
+      .single()
+
+    if (!first) return false
+
+    await supabase.from('game_players').insert({ game_id: id, user_id: first.user_id })
+    await supabase.from('waitlist').delete().eq('id', first.id)
+
+    const { data: remaining } = await supabase
+      .from('waitlist')
+      .select('id')
+      .eq('game_id', id)
+      .order('position', { ascending: true })
+
+    for (let i = 0; i < (remaining ?? []).length; i++) {
+      await supabase.from('waitlist').update({ position: i + 1 }).eq('id', remaining![i].id)
+    }
+
+    return true
+  }
+
+  async function handleJoinWaitlist() {
+    if (!user || !game) return
+    setActionLoading(true)
+    const nextPosition = waitlist.length + 1
+    await supabase.from('waitlist').insert({ game_id: game.id, user_id: user.id, position: nextPosition })
+    await fetchWaitlist()
+    setActionLoading(false)
+  }
+
+  async function handleLeaveWaitlist() {
+    if (!user || !game) return
+    setActionLoading(true)
+    await supabase.from('waitlist').delete().eq('game_id', game.id).eq('user_id', user.id)
+    const { data: remaining } = await supabase
+      .from('waitlist')
+      .select('id')
+      .eq('game_id', game.id)
+      .order('position', { ascending: true })
+    for (let i = 0; i < (remaining ?? []).length; i++) {
+      await supabase.from('waitlist').update({ position: i + 1 }).eq('id', remaining![i].id)
+    }
+    await fetchWaitlist()
+    setActionLoading(false)
+  }
+
   async function handleJoin() {
     if (!user || !game) return
     setActionLoading(true)
@@ -183,10 +254,12 @@ export default function GameDetail() {
     await supabase.from('game_players').delete().eq('game_id', game.id).eq('user_id', user.id)
 
     if (game.status === 'full') {
-      await supabase.from('games').update({ status: 'open' }).eq('id', game.id)
+      const promoted = await promoteFromWaitlist()
+      if (!promoted) await supabase.from('games').update({ status: 'open' }).eq('id', game.id)
     }
 
     await fetchGame()
+    await fetchWaitlist()
     setActionLoading(false)
   }
 
@@ -233,9 +306,11 @@ export default function GameDetail() {
     setActionLoading(true)
     await supabase.from('game_players').delete().eq('game_id', game.id).eq('user_id', playerId)
     if (game.status === 'full') {
-      await supabase.from('games').update({ status: 'open' }).eq('id', game.id)
+      const promoted = await promoteFromWaitlist()
+      if (!promoted) await supabase.from('games').update({ status: 'open' }).eq('id', game.id)
     }
     await fetchGame()
+    await fetchWaitlist()
     setActionLoading(false)
   }
 
@@ -432,6 +507,9 @@ export default function GameDetail() {
           <div className="detail-players-header">
             <span className="detail-players-title">
               Players ({game.player_count}/{game.player_limit})
+              {waitlist.length > 0 && (
+                <span className="waitlist-count">{waitlist.length} on waitlist</span>
+              )}
             </span>
             <div className="detail-bar-wrap">
               <div className="game-card-bar" style={{ flex: 1 }}>
@@ -496,22 +574,23 @@ export default function GameDetail() {
                   {actionLoading ? <span className="spinner" /> : 'Cancel Game'}
                 </button>
               ) : isJoined ? (
-                <button
-                  className="btn btn-ghost"
-                  onClick={handleLeave}
-                  disabled={actionLoading}
-                >
+                <button className="btn btn-ghost" onClick={handleLeave} disabled={actionLoading}>
                   {actionLoading ? <span className="spinner" /> : 'Leave Game'}
                 </button>
+              ) : isWaitlisted ? (
+                <div className="waitlist-status">
+                  <div className="waitlist-position">#{myWaitlistPosition} on waitlist</div>
+                  <button className="btn btn-ghost btn-sm" onClick={handleLeaveWaitlist} disabled={actionLoading}>
+                    {actionLoading ? <span className="spinner" /> : 'Leave Waitlist'}
+                  </button>
+                </div>
+              ) : isFull ? (
+                <button className="btn btn-primary btn-lg" onClick={handleJoinWaitlist} disabled={actionLoading}>
+                  {actionLoading ? <span className="spinner" /> : 'Join Waitlist'}
+                </button>
               ) : (
-                <button
-                  className="btn btn-primary btn-lg"
-                  onClick={handleJoin}
-                  disabled={actionLoading || isFull || game.status === 'full'}
-                >
-                  {actionLoading
-                    ? <span className="spinner" />
-                    : isFull ? 'Game Full' : 'Join Game'}
+                <button className="btn btn-primary btn-lg" onClick={handleJoin} disabled={actionLoading}>
+                  {actionLoading ? <span className="spinner" /> : 'Join Game'}
                 </button>
               )}
             </div>
