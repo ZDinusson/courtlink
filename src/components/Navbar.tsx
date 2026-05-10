@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import NotificationBell from './NotificationBell'
+import DMBell from './DMBell'
 import './Navbar.css'
 
 export default function Navbar() {
@@ -46,6 +47,7 @@ export default function Navbar() {
         <div className="navbar-actions">
           {user ? (
             <>
+              <DMBell />
               <NotificationBell />
               <Link to="/games/new" className="btn btn-primary btn-sm">
                 + New Game

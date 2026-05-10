@@ -12,6 +12,8 @@ import AddCourt from './pages/AddCourt'
 import CourtDetail from './pages/CourtDetail'
 import UserProfile from './pages/UserProfile'
 import Landing from './pages/Landing'
+import Messages from './pages/Messages'
+import DMThread from './pages/DMThread'
 
 function AppRoutes() {
   const { user, loading } = useAuth()
@@ -39,6 +41,8 @@ function AppRoutes() {
           <Route path="/courts/new" element={user ? <AddCourt /> : <Navigate to="/auth" />} />
           <Route path="/courts/:id" element={<CourtDetail />} />
           <Route path="/users/:id" element={<UserProfile />} />
+          <Route path="/messages" element={user ? <Messages /> : <Navigate to="/auth" />} />
+          <Route path="/messages/:userId" element={user ? <DMThread /> : <Navigate to="/auth" />} />
         </Routes>
       </main>
     </>

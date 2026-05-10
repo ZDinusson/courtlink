@@ -217,9 +217,14 @@ export default function UserProfile() {
                 </div>
               )}
               {friendStatus === 'friends' && (
-                <button className="btn btn-ghost btn-sm friend-btn-active" onClick={unfriend} disabled={actionLoading}>
-                  ✓ Friends
-                </button>
+                <>
+                  <Link to={`/messages/${id}`} className="btn btn-primary btn-sm">
+                    Message
+                  </Link>
+                  <button className="btn btn-ghost btn-sm friend-btn-active" onClick={unfriend} disabled={actionLoading}>
+                    ✓ Friends
+                  </button>
+                </>
               )}
             </div>
           )}
