@@ -74,11 +74,12 @@ export default function Profile() {
     if (hosts.length > 0) setHostRating({ avg: hosts.reduce((a, b) => a + b, 0) / hosts.length, count: hosts.length })
     setAttendance({ showed, noShow })
 
-    const [{ count: played }, { count: hosted }] = await Promise.all([
-      supabase.from('game_players').select('game_id', { count: 'exact', head: true }).eq('user_id', user.id),
-      supabase.from('games').select('id', { count: 'exact', head: true }).eq('created_by', user.id).neq('status', 'cancelled'),
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const [{ data: playedData }, { count: hosted }] = await Promise.all([
+      supabase.from('game_players').select('game_id, games!inner(date_time)').eq('user_id', user.id).lt('games.date_time', oneHourAgo),
+      supabase.from('games').select('id', { count: 'exact', head: true }).eq('created_by', user.id).neq('status', 'cancelled').lt('date_time', oneHourAgo),
     ])
-    setGamesPlayed(played ?? 0)
+    setGamesPlayed(playedData?.length ?? 0)
     setGamesHosted(hosted ?? 0)
 
     if (tab === 'hosting') {
