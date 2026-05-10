@@ -375,15 +375,18 @@ export default function GameDetail() {
           </div>
 
           <div className="detail-player-list">
-            {players.map((p, i) => (
-              <div key={p.id} className="detail-player">
-                <div className="detail-player-avatar">
-                  {(p.profiles?.username ?? '?')[0].toUpperCase()}
-                </div>
-                <span className="detail-player-name">{p.profiles?.username ?? 'Unknown'}</span>
-                {i === 0 && <span className="detail-player-host">Host</span>}
-              </div>
-            ))}
+            {players.map((p, i) => {
+              const profilePath = p.user_id === user?.id ? '/profile' : `/users/${p.user_id}`
+              return (
+                <Link key={p.id} to={profilePath} className="detail-player">
+                  <div className="detail-player-avatar">
+                    {(p.profiles?.username ?? '?')[0].toUpperCase()}
+                  </div>
+                  <span className="detail-player-name">{p.profiles?.username ?? 'Unknown'}</span>
+                  {i === 0 && <span className="detail-player-host">Host</span>}
+                </Link>
+              )
+            })}
             {Array.from({ length: game.player_limit - players.length }).map((_, i) => (
               <div key={`empty-${i}`} className="detail-player detail-player-empty">
                 <div className="detail-player-avatar empty" />

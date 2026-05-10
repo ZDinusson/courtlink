@@ -10,6 +10,7 @@ import Profile from './pages/Profile'
 import Courts from './pages/Courts'
 import AddCourt from './pages/AddCourt'
 import CourtDetail from './pages/CourtDetail'
+import UserProfile from './pages/UserProfile'
 
 function AppRoutes() {
   const { user, loading } = useAuth()
@@ -36,6 +37,7 @@ function AppRoutes() {
           <Route path="/courts" element={<Courts />} />
           <Route path="/courts/new" element={user ? <AddCourt /> : <Navigate to="/auth" />} />
           <Route path="/courts/:id" element={<CourtDetail />} />
+          <Route path="/users/:id" element={<UserProfile />} />
         </Routes>
       </main>
     </>

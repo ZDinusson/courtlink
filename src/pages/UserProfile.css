@@ -1,0 +1,146 @@
+.userprofile-page {
+  padding-top: 32px;
+  padding-bottom: 48px;
+}
+
+.userprofile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.userprofile-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), #FBBF24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.userprofile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.userprofile-username {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.userprofile-since {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.userprofile-actions {
+  flex-shrink: 0;
+}
+
+.friend-respond {
+  display: flex;
+  gap: 8px;
+}
+
+.friend-btn-active {
+  color: var(--success) !important;
+  border-color: var(--success) !important;
+}
+
+.friends-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 8px;
+  transition: background 0.15s;
+}
+
+.friends-toggle:hover {
+  background: var(--bg);
+}
+
+.friends-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.friends-count {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.friends-list {
+  padding: 8px 0;
+  margin-bottom: 20px;
+}
+
+.friends-empty {
+  padding: 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  text-decoration: none;
+  transition: background 0.12s;
+  border-bottom: 1px solid var(--border);
+}
+
+.friend-row:last-child {
+  border-bottom: none;
+}
+
+.friend-row:hover {
+  background: var(--bg);
+}
+
+.friend-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), #FBBF24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.friend-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
