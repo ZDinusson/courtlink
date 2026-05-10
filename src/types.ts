@@ -1,4 +1,4 @@
-export const SPORTS = ['basketball', 'badminton', 'pickleball', 'tennis'] as const
+export const SPORTS = ['basketball', 'pickleball', 'tennis', 'badminton'] as const
 export type Sport = typeof SPORTS[number]
 
 export const SPORT_EMOJI: Record<Sport, string> = {
