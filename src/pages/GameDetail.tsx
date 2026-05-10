@@ -36,6 +36,7 @@ export default function GameDetail() {
   const [commentLoading, setCommentLoading] = useState(false)
   const [copied, setCopied] = useState(false)
   const [waitlist, setWaitlist] = useState<{ id: string; user_id: string; position: number; profiles?: { username: string } }[]>([])
+  const [hasRated, setHasRated] = useState<boolean | null>(null)
   const chatBottomRef = useRef<HTMLDivElement>(null)
 
   const isCreator = user?.id === game?.created_by
@@ -90,6 +91,11 @@ export default function GameDetail() {
 
     if (gameData) {
       setGame({ ...gameData, player_count: playersData?.length ?? 0 })
+      if (user && new Date(gameData.date_time) < new Date()) {
+        const { data: existing } = await supabase
+          .from('ratings').select('id').eq('game_id', id).eq('rater_id', user.id).limit(1)
+        setHasRated((existing ?? []).length > 0)
+      }
     }
     setPlayers(playersData ?? [])
     if (showSpinner) setLoading(false)
@@ -185,6 +191,12 @@ export default function GameDetail() {
 
     await supabase.from('game_players').insert({ game_id: id, user_id: first.user_id })
     await supabase.from('waitlist').delete().eq('id', first.id)
+    await supabase.from('notifications').insert({
+      user_id: first.user_id,
+      type: 'waitlist_promoted',
+      from_user_id: null,
+      game_id: id,
+    })
 
     const { data: remaining } = await supabase
       .from('waitlist')
@@ -320,6 +332,12 @@ export default function GameDetail() {
     setActionLoading(true)
 
     await supabase.from('games').update({ status: 'cancelled' }).eq('id', game.id)
+
+    const notifRows = players
+      .filter(p => p.user_id !== user!.id)
+      .map(p => ({ user_id: p.user_id, type: 'game_cancelled', from_user_id: user!.id, game_id: game.id }))
+    if (notifRows.length > 0) await supabase.from('notifications').insert(notifRows)
+
     await fetchGame()
     setActionLoading(false)
   }
@@ -602,17 +620,19 @@ export default function GameDetail() {
             </div>
           )}
 
-          {isPast && isJoined && game.status !== 'cancelled' && (
+          {isPast && isJoined && game.status !== 'cancelled' && hasRated !== null && (
             <>
               <div className="divider" />
-              <div className="detail-rate-prompt">
+              <div className={`detail-rate-prompt ${hasRated ? 'detail-rate-prompt--done' : ''}`}>
                 <div>
-                  <div className="detail-rate-title">Game's over — how'd it go?</div>
-                  <div className="detail-rate-sub">Rate the players you ran with.</div>
+                  <div className="detail-rate-title">{hasRated ? '✅ Ratings submitted' : "Game's over — how'd it go?"}</div>
+                  <div className="detail-rate-sub">{hasRated ? 'Thanks for rating.' : 'Rate the players you ran with.'}</div>
                 </div>
-                <Link to={`/games/${game.id}/rate`} className="btn btn-primary btn-sm">
-                  Rate Players
-                </Link>
+                {!hasRated && (
+                  <Link to={`/games/${game.id}/rate`} className="btn btn-primary btn-sm">
+                    Rate Players
+                  </Link>
+                )}
               </div>
             </>
           )}

@@ -29,6 +29,18 @@ function notifText(n: Notif): React.ReactNode {
   const name = <strong>{n.sender?.username ?? 'Someone'}</strong>
   if (n.type === 'friend_request') return <>{name} sent you a friend request</>
   if (n.type === 'friend_accepted') return <>{name} accepted your friend request</>
+  if (n.type === 'game_cancelled') return (
+    <>
+      Game cancelled
+      {n.games?.title ? <> · <span className="notif-game">{n.games.title}</span></> : ''}
+    </>
+  )
+  if (n.type === 'waitlist_promoted') return (
+    <>
+      🎉 You&apos;re in!
+      {n.games?.title ? <> Off the waitlist for <span className="notif-game">{n.games.title}</span></> : ''}
+    </>
+  )
   return (
     <>
       {name} joined your game

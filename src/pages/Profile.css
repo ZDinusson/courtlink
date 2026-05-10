@@ -91,6 +91,55 @@
   white-space: nowrap;
 }
 
+.stats-card {
+  margin-bottom: 16px;
+  padding: 20px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+  gap: 0;
+}
+
+.stat-item {
+  padding: 4px 8px;
+}
+
+.stat-item:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-value--good {
+  color: var(--success);
+}
+
+.stat-value--bad {
+  color: var(--danger);
+}
+
+.stat-value--dim {
+  color: var(--text-dim);
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .reputation-card {
   margin-bottom: 16px;
 }

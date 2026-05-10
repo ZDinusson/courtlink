@@ -29,6 +29,8 @@ export default function Profile() {
   const [playerRating, setPlayerRating] = useState<{ avg: number; count: number } | null>(null)
   const [hostRating, setHostRating] = useState<{ avg: number; count: number } | null>(null)
   const [attendance, setAttendance] = useState<{ showed: number; noShow: number }>({ showed: 0, noShow: 0 })
+  const [gamesPlayed, setGamesPlayed] = useState<number | null>(null)
+  const [gamesHosted, setGamesHosted] = useState<number | null>(null)
   const [friends, setFriends] = useState<FriendProfile[]>([])
   const [friendsOpen, setFriendsOpen] = useState(false)
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([])
@@ -71,6 +73,13 @@ export default function Profile() {
     if (attitudes.length > 0) setPlayerRating({ avg: attitudes.reduce((a, b) => a + b, 0) / attitudes.length, count: attitudes.length })
     if (hosts.length > 0) setHostRating({ avg: hosts.reduce((a, b) => a + b, 0) / hosts.length, count: hosts.length })
     setAttendance({ showed, noShow })
+
+    const [{ count: played }, { count: hosted }] = await Promise.all([
+      supabase.from('game_players').select('game_id', { count: 'exact', head: true }).eq('user_id', user.id),
+      supabase.from('games').select('id', { count: 'exact', head: true }).eq('created_by', user.id).neq('status', 'cancelled'),
+    ])
+    setGamesPlayed(played ?? 0)
+    setGamesHosted(hosted ?? 0)
 
     if (tab === 'hosting') {
       const { data } = await supabase
@@ -295,6 +304,36 @@ export default function Profile() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {(gamesPlayed !== null || gamesHosted !== null) && (
+          <div className="stats-card card">
+            <div className="stats-grid">
+              <div className="stat-item">
+                <div className="stat-value">{gamesPlayed ?? 0}</div>
+                <div className="stat-label">Games Played</div>
+              </div>
+              <div className="stat-item">
+                <div className="stat-value">{gamesHosted ?? 0}</div>
+                <div className="stat-label">Games Hosted</div>
+              </div>
+              <div className="stat-item">
+                {attendance.showed + attendance.noShow > 0 ? (
+                  <>
+                    <div className={`stat-value ${Math.round(attendance.showed / (attendance.showed + attendance.noShow) * 100) >= 80 ? 'stat-value--good' : 'stat-value--bad'}`}>
+                      {Math.round(attendance.showed / (attendance.showed + attendance.noShow) * 100)}%
+                    </div>
+                    <div className="stat-label">Show Rate</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="stat-value stat-value--dim">—</div>
+                    <div className="stat-label">Show Rate</div>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

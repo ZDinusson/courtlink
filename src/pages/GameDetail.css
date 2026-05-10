@@ -300,6 +300,20 @@
   color: var(--orange);
 }
 
+.detail-rate-prompt--done {
+  background: rgba(22, 163, 74, 0.08);
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+.detail-rate-prompt--done .detail-rate-title {
+  color: var(--success);
+}
+
+.detail-rate-prompt--done .detail-rate-sub {
+  color: var(--success);
+  opacity: 0.8;
+}
+
 .chat-section {
   display: flex;
   flex-direction: column;

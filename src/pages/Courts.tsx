@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
-import L from 'leaflet'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import {
   COURT_SPORTS, COURT_SPORT_EMOJI, COURT_SPORT_LABEL, COURT_SPORT_COLOR,
   type Court, type CourtSport, type Game,
 } from '../types'
+import { haversineDistance } from '../utils/distance'
+import { gamePinIcon, userDotIcon } from '../utils/mapIcons'
 import './Courts.css'
 
 function MapResizer() {
@@ -34,41 +35,6 @@ function MapCenterer({ location }: { location: { lat: number; lng: number } | nu
 const ST_LOUIS: [number, number] = [38.6270, -90.1994]
 const NEAR_MILES = 10
 
-function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 3958.8
-  const dLat = ((lat2 - lat1) * Math.PI) / 180
-  const dLng = ((lng2 - lng1) * Math.PI) / 180
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-    Math.cos((lat2 * Math.PI) / 180) *
-    Math.sin(dLng / 2) ** 2
-  return R * 2 * Math.asin(Math.sqrt(a))
-}
-
-
-const gamePinIcon = L.divIcon({
-  className: '',
-  html: `<div style="
-    width:18px;height:18px;border-radius:50%;
-    background:#EF4444;border:3px solid #fff;
-    box-shadow:0 2px 8px rgba(0,0,0,0.28);
-    cursor:pointer;
-  "></div>`,
-  iconSize: [18, 18],
-  iconAnchor: [9, 9],
-})
-
-const userDotIcon = L.divIcon({
-  className: '',
-  html: `<div style="
-    width:16px;height:16px;border-radius:50%;
-    background:#3B82F6;border:3px solid #fff;
-    box-shadow:0 0 0 3px rgba(59,130,246,0.3),0 2px 8px rgba(0,0,0,0.2);
-  "></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-})
 
 interface CourtCardProps {
   court: Court

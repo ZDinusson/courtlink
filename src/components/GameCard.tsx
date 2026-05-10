@@ -38,7 +38,12 @@ export default function GameCard({ game }: Props) {
         <div className="game-card-header">
           <div>
             <h3 className="game-card-title">{game.title}</h3>
-            <p className="game-card-sub">{game.profiles?.username ?? 'Unknown'}</p>
+            <p className="game-card-sub">
+              {game.profiles?.username ?? 'Unknown'}
+              {game.hostRating && game.hostRating.count >= 3 && (
+                <span className="game-card-host-rating">★ {game.hostRating.avg.toFixed(1)}</span>
+              )}
+            </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span className="game-card-sport">{SPORT_EMOJI[game.sport]}</span>

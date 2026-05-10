@@ -57,6 +57,7 @@ export interface Game {
   courts?: { id: string; name: string } | null
   player_count?: number
   is_joined?: boolean
+  hostRating?: { avg: number; count: number } | null
 }
 
 export interface GamePlayer {

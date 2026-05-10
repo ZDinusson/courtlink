@@ -53,7 +53,7 @@
 
 .find-filters {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 14px;
 }
 
@@ -143,6 +143,19 @@
   border-color: var(--text);
 }
 
+.home-map-wrap {
+  margin-bottom: 28px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.home-map {
+  height: 220px;
+  width: 100%;
+}
+
 .home-loading {
   display: flex;
   justify-content: center;
@@ -190,5 +203,8 @@
   }
   .game-grid {
     grid-template-columns: 1fr;
+  }
+  .home-map {
+    height: 180px;
   }
 }
