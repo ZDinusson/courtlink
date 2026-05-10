@@ -16,7 +16,6 @@ export default function Navbar() {
     <header className="navbar">
       <div className="container navbar-inner">
         <Link to="/" className="navbar-logo">
-          <div className="navbar-logo-mark">CL</div>
           <span className="navbar-logo-text">CourtLink</span>
         </Link>
 
