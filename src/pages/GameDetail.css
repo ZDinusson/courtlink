@@ -187,6 +187,29 @@
   text-align: center;
 }
 
+.detail-rate-prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--orange-light);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+
+.detail-rate-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange-dark);
+  margin-bottom: 2px;
+}
+
+.detail-rate-sub {
+  font-size: 13px;
+  color: var(--orange);
+}
+
 .comments-section {
   display: flex;
   flex-direction: column;

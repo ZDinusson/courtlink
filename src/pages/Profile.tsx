@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import type { Game } from '../types'
+import { TAG_LABEL, TAG_EMOJI, type RatingTag, type Game } from '../types'
 import GameCard from '../components/GameCard'
 import './Profile.css'
 
@@ -15,6 +15,7 @@ export default function Profile() {
   const [games, setGames] = useState<Game[]>([])
   const [tab, setTab] = useState<Tab>('hosting')
   const [loading, setLoading] = useState(true)
+  const [tagCounts, setTagCounts] = useState<Partial<Record<RatingTag, number>>>({})
 
   useEffect(() => {
     if (user) fetchData()
@@ -31,6 +32,19 @@ export default function Profile() {
       .single()
 
     if (profile) setUsername(profile.username)
+
+    const { data: ratingsData } = await supabase
+      .from('ratings')
+      .select('tags')
+      .eq('ratee_id', user.id)
+
+    const counts: Partial<Record<RatingTag, number>> = {}
+    for (const row of ratingsData ?? []) {
+      for (const tag of (row.tags as RatingTag[])) {
+        counts[tag] = (counts[tag] ?? 0) + 1
+      }
+    }
+    setTagCounts(counts)
 
     if (tab === 'hosting') {
       const { data } = await supabase
@@ -92,6 +106,24 @@ export default function Profile() {
             Sign Out
           </button>
         </div>
+
+        {Object.keys(tagCounts).length > 0 && (
+          <div className="reputation-card card">
+            <div className="reputation-title">Reputation</div>
+            <div className="reputation-tags">
+              {(Object.entries(tagCounts) as [RatingTag, number][])
+                .sort((a, b) => b[1] - a[1])
+                .map(([tag, count]) => (
+                  <div key={tag} className={`reputation-tag ${tag === 'no_show' || tag === 'too_aggressive' ? 'rep-negative' : ''}`}>
+                    <span className="rep-emoji">{TAG_EMOJI[tag]}</span>
+                    <span className="rep-label">{TAG_LABEL[tag]}</span>
+                    <span className="rep-count">×{count}</span>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        )}
 
         <div className="profile-tabs">
           <button

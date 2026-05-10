@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import AuthPage from './pages/AuthPage'
 import CreateGame from './pages/CreateGame'
 import GameDetail from './pages/GameDetail'
+import RateGame from './pages/RateGame'
 import Profile from './pages/Profile'
 
 function AppRoutes() {
@@ -27,6 +28,7 @@ function AppRoutes() {
           <Route path="/auth" element={user ? <Navigate to="/" /> : <AuthPage />} />
           <Route path="/games/new" element={user ? <CreateGame /> : <Navigate to="/auth" />} />
           <Route path="/games/:id" element={<GameDetail />} />
+          <Route path="/games/:id/rate" element={user ? <RateGame /> : <Navigate to="/auth" />} />
           <Route path="/profile" element={user ? <Profile /> : <Navigate to="/auth" />} />
         </Routes>
       </main>

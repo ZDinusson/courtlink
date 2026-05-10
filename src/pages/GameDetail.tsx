@@ -37,6 +37,7 @@ export default function GameDetail() {
   const isCreator = user?.id === game?.created_by
   const isJoined = players.some(p => p.user_id === user?.id)
   const isFull = (game?.player_count ?? 0) >= (game?.player_limit ?? 0)
+  const isPast = game ? new Date(game.date_time) < new Date() : false
 
   useEffect(() => {
     if (!id) return
@@ -394,6 +395,21 @@ export default function GameDetail() {
             <div className="detail-cancelled">
               This game has been cancelled.
             </div>
+          )}
+
+          {isPast && isJoined && game.status !== 'cancelled' && (
+            <>
+              <div className="divider" />
+              <div className="detail-rate-prompt">
+                <div>
+                  <div className="detail-rate-title">Game's over — how'd it go?</div>
+                  <div className="detail-rate-sub">Rate the players you ran with.</div>
+                </div>
+                <Link to={`/games/${game.id}/rate`} className="btn btn-primary btn-sm">
+                  Rate Players
+                </Link>
+              </div>
+            </>
           )}
 
           <div className="divider" />
