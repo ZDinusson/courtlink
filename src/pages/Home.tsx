@@ -8,12 +8,34 @@ import './Home.css'
 
 type StatusFilter = 'open' | 'all'
 type SportFilter = Sport | 'all'
+
 function getTimeRange(dateStr: string): { start: string; end: string } | null {
   if (!dateStr) return null
   const start = new Date(`${dateStr}T00:00:00`)
   const end = new Date(`${dateStr}T23:59:59.999`)
   return { start: start.toISOString(), end: end.toISOString() }
 }
+
+function buildDateOptions() {
+  const options: { value: string; label: string }[] = []
+  const now = new Date()
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(now)
+    d.setDate(d.getDate() + i)
+    const value = d.toISOString().split('T')[0]
+    const label = i === 0
+      ? 'Today'
+      : i === 1
+      ? 'Tomorrow'
+      : `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
+    options.push({ value, label })
+  }
+  return options
+}
+
+const DATE_OPTIONS = buildDateOptions()
 
 export default function Home() {
   const { user } = useAuth()
@@ -118,16 +140,12 @@ export default function Home() {
             </div>
             <div className="find-filter">
               <label>When</label>
-              <div className="find-date-wrap">
-                <input
-                  type="date"
-                  value={whenFilter}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={e => setWhenFilter(e.target.value)}
-                  className={`find-date-input${!whenFilter ? ' find-date-empty' : ''}`}
-                />
-                {!whenFilter && <span className="find-date-placeholder">Any time</span>}
-              </div>
+              <select value={whenFilter} onChange={e => setWhenFilter(e.target.value)}>
+                <option value="">Any time</option>
+                {DATE_OPTIONS.map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </div>
             <div className="find-filter">
               <label>Skill</label>
