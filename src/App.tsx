@@ -11,6 +11,7 @@ import Courts from './pages/Courts'
 import AddCourt from './pages/AddCourt'
 import CourtDetail from './pages/CourtDetail'
 import UserProfile from './pages/UserProfile'
+import Landing from './pages/Landing'
 
 function AppRoutes() {
   const { user, loading } = useAuth()
@@ -28,7 +29,7 @@ function AppRoutes() {
       <Navbar />
       <main style={{ flex: 1, paddingBottom: 32 }}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={user ? <Home /> : <Landing />} />
           <Route path="/auth" element={user ? <Navigate to="/" /> : <AuthPage />} />
           <Route path="/games/new" element={user ? <CreateGame /> : <Navigate to="/auth" />} />
           <Route path="/games/:id" element={<GameDetail />} />

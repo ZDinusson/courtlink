@@ -1,0 +1,251 @@
+.landing {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Hero ── */
+.landing-hero {
+  background: #0C0C0C;
+  padding: 100px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-sports-bg {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+  padding-right: 80px;
+  pointer-events: none;
+  user-select: none;
+}
+
+.landing-sports-bg span {
+  font-size: 96px;
+  opacity: 0.07;
+  line-height: 1;
+}
+
+.landing-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-hero-content {
+  max-width: 580px;
+}
+
+.landing-headline {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+  line-height: 1.05;
+  margin-bottom: 20px;
+}
+
+.landing-sub {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+  line-height: 1.6;
+  margin-bottom: 36px;
+  max-width: 480px;
+}
+
+.landing-ctas {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.landing-browse-btn {
+  color: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.landing-browse-btn:hover {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── How it works ── */
+.landing-how {
+  padding: 80px 0;
+  background: var(--bg);
+}
+
+.landing-section-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
+.landing-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.landing-feature-card {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.landing-feature-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.landing-feature-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.landing-feature-desc {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── Live games ── */
+.landing-games {
+  padding: 80px 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.landing-games-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.landing-see-all {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--orange);
+  text-decoration: none;
+}
+
+.landing-see-all:hover {
+  text-decoration: underline;
+}
+
+.landing-games-grid {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.landing-games-empty {
+  text-align: center;
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+/* ── Bottom CTA ── */
+.landing-cta-banner {
+  background: var(--orange);
+  padding: 80px 0;
+}
+
+.landing-cta-inner {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-cta-title {
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+  margin-bottom: 0;
+}
+
+.landing-cta-sub {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 8px;
+}
+
+.landing-cta-btn {
+  background: #fff !important;
+  color: var(--orange) !important;
+  border-color: transparent !important;
+  font-weight: 800;
+}
+
+.landing-cta-btn:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: none !important;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .landing-hero {
+    padding: 64px 0 56px;
+  }
+
+  .landing-headline {
+    font-size: 38px;
+  }
+
+  .landing-sub {
+    font-size: 16px;
+  }
+
+  .landing-sports-bg {
+    padding-right: 0;
+    justify-content: center;
+    opacity: 0.5;
+  }
+
+  .landing-sports-bg span {
+    font-size: 64px;
+  }
+
+  .landing-features {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-how,
+  .landing-games,
+  .landing-cta-banner {
+    padding: 56px 0;
+  }
+
+  .landing-section-title {
+    font-size: 22px;
+  }
+
+  .landing-cta-title {
+    font-size: 30px;
+  }
+
+  .landing-games-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
