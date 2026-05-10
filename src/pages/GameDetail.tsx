@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -34,6 +34,7 @@ export default function GameDetail() {
   const [comments, setComments] = useState<Comment[]>([])
   const [commentBody, setCommentBody] = useState('')
   const [commentLoading, setCommentLoading] = useState(false)
+  const chatBottomRef = useRef<HTMLDivElement>(null)
 
   const isCreator = user?.id === game?.created_by
   const isJoined = players.some(p => p.user_id === user?.id)
@@ -85,6 +86,10 @@ export default function GameDetail() {
     if (showSpinner) setLoading(false)
   }
 
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [comments])
+
   async function fetchComments() {
     if (!id) return
     const { data } = await supabase
@@ -99,13 +104,17 @@ export default function GameDetail() {
     e.preventDefault()
     if (!user || !game || !commentBody.trim()) return
     setCommentLoading(true)
-    await supabase.from('comments').insert({
-      game_id: game.id,
-      user_id: user.id,
-      body: commentBody.trim(),
-    })
+    const body = commentBody.trim()
     setCommentBody('')
+    await supabase.from('comments').insert({ game_id: game.id, user_id: user.id, body })
     setCommentLoading(false)
+  }
+
+  function handleChatKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (commentBody.trim()) handlePostComment(e as unknown as React.FormEvent)
+    }
   }
 
   async function handleJoin() {
@@ -438,46 +447,67 @@ export default function GameDetail() {
 
           <div className="divider" />
 
-          <div className="comments-section">
-            <h3 className="comments-title">Comments {comments.length > 0 && <span className="comments-count">{comments.length}</span>}</h3>
+          <div className="chat-section">
+            <div className="chat-header">
+              <span className="chat-title">Game Chat</span>
+              {comments.length > 0 && <span className="chat-count">{comments.length}</span>}
+            </div>
 
-            {comments.length === 0 && (
-              <p className="comments-empty">No comments yet. Be the first.</p>
-            )}
-
-            <div className="comments-list">
-              {comments.map(c => (
-                <div key={c.id} className="comment">
-                  <div className="comment-avatar">
-                    {(c.profiles?.username ?? '?')[0].toUpperCase()}
-                  </div>
-                  <div className="comment-body">
-                    <div className="comment-meta">
-                      <span className="comment-username">{c.profiles?.username ?? 'Unknown'}</span>
-                      <span className="comment-time">{new Date(c.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} · {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                    </div>
-                    <p className="comment-text">{c.body}</p>
-                  </div>
+            <div className="chat-messages">
+              {comments.length === 0 && (
+                <div className="chat-empty">
+                  <p>No messages yet. Ask the group something.</p>
                 </div>
-              ))}
+              )}
+              {comments.map(c => {
+                const isOwn = c.user_id === user?.id
+                const time = new Date(c.created_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+                return (
+                  <div key={c.id} className={`chat-msg ${isOwn ? 'chat-msg-own' : 'chat-msg-other'}`}>
+                    {!isOwn && (
+                      <div className="chat-avatar">{(c.profiles?.username ?? '?')[0].toUpperCase()}</div>
+                    )}
+                    <div className="chat-bubble-wrap">
+                      {!isOwn && <div className="chat-name">{c.profiles?.username ?? 'Unknown'}</div>}
+                      <div className="chat-bubble">{c.body}</div>
+                      <div className="chat-time">{time}</div>
+                    </div>
+                  </div>
+                )
+              })}
+              <div ref={chatBottomRef} />
             </div>
 
             {user ? (
-              <form onSubmit={handlePostComment} className="comment-form">
-                <textarea
-                  className="comment-input"
-                  placeholder="Add a comment..."
-                  value={commentBody}
-                  onChange={e => setCommentBody(e.target.value)}
-                  maxLength={300}
-                  rows={2}
-                />
-                <button type="submit" className="btn btn-primary btn-sm" disabled={commentLoading || !commentBody.trim()}>
-                  {commentLoading ? <span className="spinner" /> : 'Post'}
-                </button>
-              </form>
+              <>
+                <div className="chat-quick-replies">
+                  {['Still happening?', 'Need one more?', 'Lights available?', 'Indoor or outdoor?'].map(q => (
+                    <button key={q} type="button" className="quick-reply" onClick={() => setCommentBody(q)}>
+                      {q}
+                    </button>
+                  ))}
+                </div>
+                <form onSubmit={handlePostComment} className="chat-form">
+                  <input
+                    className="chat-input"
+                    placeholder="Message the group..."
+                    value={commentBody}
+                    onChange={e => setCommentBody(e.target.value)}
+                    onKeyDown={handleChatKey}
+                    maxLength={300}
+                  />
+                  <button type="submit" className="chat-send" disabled={commentLoading || !commentBody.trim()}>
+                    {commentLoading ? <span className="spinner" style={{ width: 16, height: 16 }} /> : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                      </svg>
+                    )}
+                  </button>
+                </form>
+              </>
             ) : (
-              <p className="comments-signin"><Link to="/auth">Sign in</Link> to leave a comment.</p>
+              <p className="chat-signin"><Link to="/auth">Sign in</Link> to chat with the group.</p>
             )}
           </div>
           </>
