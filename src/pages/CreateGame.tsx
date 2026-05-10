@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
@@ -16,6 +16,7 @@ interface CourtResult {
 export default function CreateGame() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [title, setTitle] = useState('')
   const [sport, setSport] = useState<Sport>('basketball')
@@ -31,6 +32,9 @@ export default function CreateGame() {
   const [courtQuery, setCourtQuery] = useState('')
   const [courtResults, setCourtResults] = useState<CourtResult[]>([])
   const [selectedCourt, setSelectedCourt] = useState<CourtResult | null>(null)
+
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   const minDate = new Date().toISOString().split('T')[0]
 
@@ -62,6 +66,33 @@ export default function CreateGame() {
     setLocation('')
   }
 
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
+
+  function clearImage() {
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  async function geocode(query: string): Promise<{ lat: number; lng: number } | null> {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`,
+        { headers: { 'User-Agent': 'CourtLink App' } }
+      )
+      const results = await res.json()
+      if (!results.length) return null
+      return { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) }
+    } catch {
+      return null
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!user) return
@@ -69,6 +100,15 @@ export default function CreateGame() {
     setLoading(true)
 
     const dateTime = new Date(`${date}T${time}`).toISOString()
+
+    let lat: number | null = selectedCourt?.lat ?? null
+    let lng: number | null = selectedCourt?.lng ?? null
+
+    if (!selectedCourt && location.trim()) {
+      const coords = await geocode(location.trim())
+      lat = coords?.lat ?? null
+      lng = coords?.lng ?? null
+    }
 
     const { data, error: insertError } = await supabase
       .from('games')
@@ -83,8 +123,8 @@ export default function CreateGame() {
         description: description.trim() || null,
         status: 'open',
         court_id: selectedCourt?.id ?? null,
-        lat: selectedCourt?.lat ?? null,
-        lng: selectedCourt?.lng ?? null,
+        lat,
+        lng,
       })
       .select()
       .single()
@@ -93,6 +133,20 @@ export default function CreateGame() {
       setError(insertError.message)
       setLoading(false)
       return
+    }
+
+    // Upload image if selected
+    if (imageFile) {
+      const ext = imageFile.name.split('.').pop() ?? 'jpg'
+      const path = `${user.id}/${data.id}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('game-images')
+        .upload(path, imageFile, { upsert: true })
+
+      if (!uploadError) {
+        const { data: urlData } = supabase.storage.from('game-images').getPublicUrl(path)
+        await supabase.from('games').update({ image_url: urlData.publicUrl }).eq('id', data.id)
+      }
     }
 
     await supabase.from('game_players').insert({
@@ -117,6 +171,37 @@ export default function CreateGame() {
         </div>
 
         <form onSubmit={handleSubmit} className="create-form card">
+
+          <div className="field">
+            <label>Photo (optional)</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: 'none' }}
+            />
+            {imagePreview ? (
+              <div className="image-preview-wrap">
+                <img src={imagePreview} className="image-preview" alt="Game photo" />
+                <button type="button" className="image-clear" onClick={clearImage}>×</button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="image-pick-btn"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                Add a photo
+              </button>
+            )}
+          </div>
+
           <div className="field">
             <label htmlFor="title">Game Name</label>
             <input

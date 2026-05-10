@@ -3,9 +3,26 @@
   background: var(--bg-card);
   border: 1.5px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px 22px;
+  overflow: hidden;
   transition: all 0.18s ease;
   text-decoration: none;
+}
+
+.game-card-image {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.game-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.game-card-body {
+  padding: 20px 22px;
 }
 
 .game-card:hover {

@@ -46,6 +46,7 @@ export interface Game {
   court_id?: string | null
   lat?: number | null
   lng?: number | null
+  image_url?: string | null
   profiles?: Profile
   courts?: { id: string; name: string } | null
   player_count?: number

@@ -281,6 +281,12 @@ export default function GameDetail() {
             </form>
           ) : (
           <>
+          {game.image_url && (
+            <div className="detail-image">
+              <img src={game.image_url} alt={game.title} />
+            </div>
+          )}
+
           <div className="detail-top">
             <div>
               <span className={`badge badge-${game.status}`} style={{ marginBottom: 8 }}>{game.status}</span>
