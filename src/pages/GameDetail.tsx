@@ -192,6 +192,17 @@ export default function GameDetail() {
     setEditLoading(false)
   }
 
+  async function handleKick(playerId: string) {
+    if (!game || !isCreator) return
+    setActionLoading(true)
+    await supabase.from('game_players').delete().eq('game_id', game.id).eq('user_id', playerId)
+    if (game.status === 'full') {
+      await supabase.from('games').update({ status: 'open' }).eq('id', game.id)
+    }
+    await fetchGame()
+    setActionLoading(false)
+  }
+
   async function handleCancel() {
     if (!game || !isCreator) return
     if (!confirm('Cancel this game? This cannot be undone.')) return
@@ -383,14 +394,29 @@ export default function GameDetail() {
           <div className="detail-player-list">
             {players.map((p, i) => {
               const profilePath = p.user_id === user?.id ? '/profile' : `/users/${p.user_id}`
+              const canKick = isCreator && p.user_id !== user?.id && game.status !== 'cancelled'
               return (
-                <Link key={p.id} to={profilePath} className="detail-player">
-                  <div className="detail-player-avatar">
-                    {(p.profiles?.username ?? '?')[0].toUpperCase()}
-                  </div>
-                  <span className="detail-player-name">{p.profiles?.username ?? 'Unknown'}</span>
-                  {i === 0 && <span className="detail-player-host">Host</span>}
-                </Link>
+                <div key={p.id} className="detail-player">
+                  <Link to={profilePath} className="detail-player-link">
+                    <div className="detail-player-avatar">
+                      {(p.profiles?.username ?? '?')[0].toUpperCase()}
+                    </div>
+                    <span className="detail-player-name">{p.profiles?.username ?? 'Unknown'}</span>
+                    {i === 0 && <span className="detail-player-host">Host</span>}
+                  </Link>
+                  {canKick && (
+                    <button
+                      className="detail-player-kick"
+                      onClick={() => handleKick(p.user_id)}
+                      disabled={actionLoading}
+                      title="Remove player"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  )}
+                </div>
               )
             })}
             {Array.from({ length: game.player_limit - players.length }).map((_, i) => (

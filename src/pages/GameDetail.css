@@ -144,9 +144,7 @@
 .detail-player {
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: inherit;
+  gap: 4px;
   border-radius: var(--radius-sm);
   padding: 2px 4px;
   margin: -2px -4px;
@@ -155,6 +153,42 @@
 
 .detail-player:hover {
   background: var(--bg);
+}
+
+.detail-player-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-player-kick {
+  opacity: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  padding: 0;
+  flex-shrink: 0;
+  transition: opacity 0.12s, background 0.12s, color 0.12s;
+}
+
+.detail-player:hover .detail-player-kick {
+  opacity: 1;
+}
+
+.detail-player-kick:hover {
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
 }
 
 .detail-player-avatar {
