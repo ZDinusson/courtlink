@@ -111,18 +111,21 @@ export default function Home() {
 
   return (
     <div className="home">
-      <div className="container">
-        <div className="home-hero">
-          <div>
-            <h1 className="home-title">Find a Game</h1>
-            <p className="home-subtitle">Pickup games happening near you</p>
-          </div>
-          {user && (
-            <Link to="/games/new" className="btn btn-primary btn-lg">
-              + Host a Game
+      <section className="home-banner">
+        <div className="container">
+          <div className="home-banner-inner">
+            <div>
+              <h1 className="home-banner-title">Find a Game</h1>
+              <p className="home-banner-sub">Pickup games happening near you</p>
+            </div>
+            <Link to={user ? '/games/new' : '/auth'} className="btn btn-primary btn-lg home-banner-cta">
+              {user ? '+ Host a Game' : 'Get Started'}
             </Link>
-          )}
+          </div>
         </div>
+      </section>
+
+      <div className="container home-body">
 
         <div className="find-panel card">
           <div className="find-panel-label">Find me a game</div>
@@ -206,3 +209,4 @@ export default function Home() {
     </div>
   )
 }
+

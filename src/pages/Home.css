@@ -1,78 +1,91 @@
-.home {
-  padding-top: 32px;
+.home-banner {
+  background: #0C0C0C;
+  padding: 64px 0;
 }
 
-.home-hero {
+.home-banner-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 32px;
 }
 
-.home-title {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.1;
-  margin-bottom: 4px;
+.home-banner-title {
+  font-size: 60px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: #fff;
+  line-height: 1;
+  margin-bottom: 14px;
 }
 
-.home-subtitle {
-  color: var(--text-muted);
-  font-size: 15px;
+.home-banner-sub {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.home-banner-cta {
+  flex-shrink: 0;
+}
+
+.home-body {
+  padding-top: 40px;
+  padding-bottom: 64px;
 }
 
 .find-panel {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
+  padding: 24px;
 }
 
 .find-panel-label {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
 }
 
 .find-filters {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 .find-filter {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .find-filter label {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--text-muted);
 }
 
 .find-filter select {
   width: 100%;
-  padding: 9px 12px;
+  padding: 10px 14px;
   background: var(--bg);
-  border: 1px solid var(--border-light);
+  border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--text);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   font-family: inherit;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 30px;
+  background-position: right 12px center;
+  padding-right: 34px;
   cursor: pointer;
   transition: border-color 0.15s;
 }
@@ -87,10 +100,11 @@
   border: none;
   color: var(--orange);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0;
   cursor: pointer;
   width: fit-content;
+  letter-spacing: -0.01em;
 }
 
 .find-clear:hover {
@@ -101,18 +115,20 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .filter-btn {
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: 100px;
   font-size: 13px;
-  font-weight: 600;
-  border: 1px solid var(--border-light);
-  background: transparent;
+  font-weight: 700;
+  border: 1.5px solid var(--border);
+  background: var(--bg-card);
   color: var(--text-muted);
+  cursor: pointer;
   transition: all 0.15s;
+  letter-spacing: -0.01em;
 }
 
 .filter-btn:hover {
@@ -121,51 +137,63 @@
 }
 
 .filter-btn.active {
-  background: var(--orange);
+  background: var(--text);
   color: #fff;
-  border-color: var(--orange);
+  border-color: var(--text);
 }
 
 .home-loading {
   display: flex;
   justify-content: center;
-  padding: 60px 0;
+  padding: 80px 0;
 }
 
 .home-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 60px 0;
+  padding: 80px 0;
   gap: 16px;
   text-align: center;
 }
 
 .home-empty-icon {
-  font-size: 48px;
-  filter: grayscale(0.5);
-  opacity: 0.6;
+  font-size: 56px;
+  filter: grayscale(0.3);
+  opacity: 0.7;
 }
 
 .home-empty-text {
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .game-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
-@media (max-width: 480px) {
-  .home-title {
-    font-size: 26px;
+@media (max-width: 640px) {
+  .home-banner {
+    padding: 48px 0;
   }
-  .home {
-    padding-top: 20px;
+  .home-banner-title {
+    font-size: 40px;
+  }
+  .home-banner-sub {
+    font-size: 15px;
+  }
+  .home-banner-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
   }
   .find-filters {
+    grid-template-columns: 1fr;
+  }
+  .game-grid {
     grid-template-columns: 1fr;
   }
 }
