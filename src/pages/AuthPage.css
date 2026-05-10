@@ -18,8 +18,17 @@
 }
 
 .auth-logo {
-  font-size: 40px;
   margin-bottom: 12px;
+}
+
+.auth-wordmark {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--orange), #FBBF24);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .auth-title {

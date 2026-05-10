@@ -61,7 +61,9 @@ export default function AuthPage() {
       <div className="container">
         <div className="auth-card card">
           <div className="auth-header">
-            <div className="auth-logo">🏀</div>
+            <div className="auth-logo">
+              <span className="auth-wordmark">CourtLink</span>
+            </div>
             <h1 className="auth-title">
               {mode === 'login' ? 'Welcome back' : 'Join CourtLink'}
             </h1>
