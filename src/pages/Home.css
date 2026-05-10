@@ -1,0 +1,93 @@
+.home {
+  padding-top: 32px;
+}
+
+.home-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.home-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.home-subtitle {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.home-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.filter-btn {
+  padding: 7px 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--border-light);
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.filter-btn:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.filter-btn.active {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+}
+
+.home-loading {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.home-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 0;
+  gap: 16px;
+  text-align: center;
+}
+
+.home-empty-icon {
+  font-size: 48px;
+  filter: grayscale(0.5);
+  opacity: 0.6;
+}
+
+.home-empty-text {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.game-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .home-title {
+    font-size: 26px;
+  }
+  .home {
+    padding-top: 20px;
+  }
+}

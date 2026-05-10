@@ -1,0 +1,85 @@
+.game-card {
+  display: block;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.game-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.game-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.game-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.game-card-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.game-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.game-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.game-card-meta-item svg {
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.game-card-players {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.game-card-bar {
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.game-card-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), #FBBF24);
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
+.game-card-player-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.spots-left {
+  color: var(--success);
+}
