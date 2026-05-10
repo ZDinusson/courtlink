@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { SPORT_EMOJI, SPORT_LABEL, type Game, type GamePlayer } from '../types'
+import { SPORT_EMOJI, SPORT_LABEL, SPORTS, type Sport, type Game, type GamePlayer } from '../types'
 import './GameDetail.css'
 
 function formatDateTime(dateStr: string) {
@@ -22,6 +22,14 @@ export default function GameDetail() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState('')
+  const [editSport, setEditSport] = useState<Sport>('basketball')
+  const [editLocation, setEditLocation] = useState('')
+  const [editDate, setEditDate] = useState('')
+  const [editTime, setEditTime] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
 
   const isCreator = user?.id === game?.created_by
   const isJoined = players.some(p => p.user_id === user?.id)
@@ -91,6 +99,42 @@ export default function GameDetail() {
     setActionLoading(false)
   }
 
+  function openEdit() {
+    if (!game) return
+    const d = new Date(game.date_time)
+    setEditTitle(game.title)
+    setEditSport(game.sport)
+    setEditLocation(game.location)
+    setEditDate(d.toISOString().split('T')[0])
+    setEditTime(d.toTimeString().slice(0, 5))
+    setEditDescription(game.description ?? '')
+    setEditing(true)
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!game) return
+    setEditLoading(true)
+    const dateTime = new Date(`${editDate}T${editTime}`).toISOString()
+    const { error: updateError } = await supabase
+      .from('games')
+      .update({
+        title: editTitle.trim(),
+        sport: editSport,
+        location: editLocation.trim(),
+        date_time: dateTime,
+        description: editDescription.trim() || null,
+      })
+      .eq('id', game.id)
+    if (updateError) {
+      setError(updateError.message)
+    } else {
+      setEditing(false)
+      await fetchGame()
+    }
+    setEditLoading(false)
+  }
+
   async function handleCancel() {
     if (!game || !isCreator) return
     if (!confirm('Cancel this game? This cannot be undone.')) return
@@ -129,12 +173,58 @@ export default function GameDetail() {
         </button>
 
         <div className="detail-card card">
+          {editing ? (
+            <form onSubmit={handleSaveEdit} className="edit-form">
+              <h2 className="edit-form-title">Edit Game</h2>
+              <div className="field">
+                <label htmlFor="edit-title">Game Name</label>
+                <input id="edit-title" type="text" value={editTitle} onChange={e => setEditTitle(e.target.value)} required maxLength={80} />
+              </div>
+              <div className="field">
+                <label htmlFor="edit-sport">Sport</label>
+                <select id="edit-sport" value={editSport} onChange={e => setEditSport(e.target.value as Sport)}>
+                  {SPORTS.map(s => (
+                    <option key={s} value={s}>{SPORT_EMOJI[s]} {SPORT_LABEL[s]}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="edit-location">Location / Court</label>
+                <input id="edit-location" type="text" value={editLocation} onChange={e => setEditLocation(e.target.value)} required maxLength={120} />
+              </div>
+              <div className="create-row">
+                <div className="field">
+                  <label htmlFor="edit-date">Date</label>
+                  <input id="edit-date" type="date" value={editDate} onChange={e => setEditDate(e.target.value)} required />
+                </div>
+                <div className="field">
+                  <label htmlFor="edit-time">Time</label>
+                  <input id="edit-time" type="time" value={editTime} onChange={e => setEditTime(e.target.value)} required />
+                </div>
+              </div>
+              <div className="field">
+                <label htmlFor="edit-description">Details (optional)</label>
+                <textarea id="edit-description" value={editDescription} onChange={e => setEditDescription(e.target.value)} maxLength={500} />
+              </div>
+              {error && <p className="error-msg">{error}</p>}
+              <div className="edit-actions">
+                <button type="button" className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={editLoading}>
+                  {editLoading ? <span className="spinner" /> : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          ) : (
+          <>
           <div className="detail-top">
             <div>
               <span className={`badge badge-${game.status}`} style={{ marginBottom: 8 }}>{game.status}</span>
               <h1 className="detail-title">{game.title}</h1>
               <p className="detail-host">Hosted by <strong>{game.profiles?.username ?? 'Unknown'}</strong></p>
             </div>
+            {isCreator && game.status !== 'cancelled' && (
+              <button className="btn btn-ghost btn-sm" onClick={openEdit}>Edit</button>
+            )}
           </div>
 
           <div className="divider" />
@@ -260,6 +350,8 @@ export default function GameDetail() {
             <div className="detail-cancelled">
               This game has been cancelled.
             </div>
+          )}
+          </>
           )}
         </div>
       </div>

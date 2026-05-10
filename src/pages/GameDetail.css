@@ -187,8 +187,43 @@
   text-align: center;
 }
 
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edit-form-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.create-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
 @media (max-width: 480px) {
   .detail-title {
     font-size: 22px;
+  }
+  .create-row {
+    grid-template-columns: 1fr;
+  }
+  .edit-actions {
+    flex-direction: column-reverse;
+  }
+  .edit-actions .btn {
+    width: 100%;
   }
 }
